@@ -89,10 +89,18 @@ function endGame(gameId) {
 
 /* This file will contain all of the backend game logic */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Game Home Page' });
+  res.render('index', { title: 'Create a game!' });
 });
 
-router.get('/events', function(req, res, next) {
+router.get('/game', function(req, res, next) {
+  res.send(map);
+});
+
+router.get('/territories', function(req, res, next) {
+  res.send(map);
+});
+
+router.post('/events', function(req, res, next) {
 	switch (req.body.event.type){
     case "CreateGame":
       res.send(createGame());
@@ -137,11 +145,6 @@ router.get('/events', function(req, res, next) {
 	   default: 
 	       console.log("this shouldn't happen");
 	}
-});
-
-
-router.get('/territories', function(req, res, next) {
-	res.send(map);
 });
 
 module.exports = router;
