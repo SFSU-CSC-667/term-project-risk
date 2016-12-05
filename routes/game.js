@@ -94,6 +94,15 @@ router.get('/', function(req, res, next) {
 
 router.get('/:id', function(req, res, next) {
   res.render('game', { title: 'Create a game!' });
+  //Eventually the code will work like this
+  /*
+  game = games[req.params.id];
+  if (game != null) {
+    res.render('game', { gameState: game });
+  } else {
+    res.render('index', { title: 'Create a game!' });
+  }
+  */
 });
 
 router.get('/territories', function(req, res, next) {
