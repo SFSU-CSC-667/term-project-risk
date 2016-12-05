@@ -92,8 +92,8 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Create a game!' });
 });
 
-router.get('/game', function(req, res, next) {
-  res.send(map);
+router.get('/:id', function(req, res, next) {
+  res.render('game', { title: 'Create a game!' });
 });
 
 router.get('/territories', function(req, res, next) {

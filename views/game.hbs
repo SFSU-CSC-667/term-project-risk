@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jQuery.js"></script>
+<script type="text/javascript" src="/js/imagemapster.js"></script>
+<script type="text/javascript" src="/js/scripts.js"></script>
+</head>
+
+<style>
+
+</style>
+<body>
+
+
+<p style="text-align: center">Click on the regions</p>
+
+<img id="planetmap" src="/img/risk2.jpg" width="1200" height="675" alt="Planets" usemap="#planetmap">
+
+<map name="planetmap">
+    <area href="#" name="middleEast" alt="middleEast" title="middleEast" coords="543,292,551,300,576,292,587,298,603,300,628,294,644,303,652,297,666,298,673,305,678,318,680,334,684,343,686,360,679,368,669,373,661,368,650,368,648,348,640,351,640,365,650,375,662,379,669,381,678,389,682,406,674,416,666,425,654,438,641,444,623,444,611,421,597,404,584,389,572,375,580,358,580,339,573,336,567,339,553,336,536,330,531,317,536,305,543,300" shape="poly" onclick="middleEast()">
+    <area href="#" alt="india" title="india" coords="676,305,683,305,690,296,699,289,709,296,724,288,737,290,735,303,733,313,745,322,756,324,769,330,784,332,792,344,779,368,773,377,767,379,760,400,754,427,745,457,738,455,722,419,716,402,720,379,712,383,703,372,687,360,684,343,678,326" shape="poly" onclick="india()">
+    <area href="#" alt="afghanistan" title="afghanistan" coords="649,294,648,280,641,268,635,252,637,238,627,243,618,232,616,213,629,202,644,198,656,194,669,188,682,198,688,213,709,219,731,230,728,246,722,261,712,268,721,287,712,295,699,290,688,297,679,307,665,296" shape="poly" onclick="afghanistan()">
+    <area href="#" alt="china" title="china" coords="742,209,755,213,764,226,775,232,779,245,792,258,803,264,822,264,840,268,865,273,877,285,877,300,881,311,878,323,874,338,860,353,851,364,841,357,828,347,817,359,805,344,792,340,784,330,771,330,750,321,733,313,738,302,735,289,721,285,712,269,728,253,728,234,734,219" shape="poly" onclick="china()">
+    <area href="#" alt="ural" title="ural" coords="726,231,741,214,745,200,728,179,720,167,730,159,722,148,724,133,709,114,703,91,695,80,687,91,679,97,686,78,678,66,680,55,666,44,662,57,661,66,670,80,667,93,661,106,663,123,661,141,665,149,661,159,670,165,667,174,669,186,680,197,688,209,703,218" shape="poly" onclick="ural()">
+    <area href="#" alt="siberia" title="siberia" coords="699,77,686,70,686,53,696,63,692,49,697,40,728,21,750,18,758,13,762,18,775,21,773,34,779,36,792,35,798,38,800,49,806,60,800,76,792,77,779,85,788,92,792,106,797,122,793,135,796,147,792,159,779,155,769,164,762,168,767,178,762,191,771,199,773,214,771,229,758,214,743,208,737,186,725,176,728,155,728,147,722,127,707,114,703,94" shape="poly" onclick="siberia()">
+    <area href="#" alt="mongolia" title="mongolia" coords="773,197,796,201,813,201,831,198,837,178,847,174,864,193,869,197,868,206,877,210,885,223,878,235,882,245,894,254,892,265,885,270,882,259,873,252,865,256,864,246,856,254,860,261,870,265,864,271,843,267,826,265,805,263,788,254,777,244,772,228,772,220" shape="poly" onclick="mongolia()">
+    <area href="#" alt="irkutsk" title="irkutsk" coords="771,194,792,201,805,201,827,199,835,189,834,178,847,174,856,186,870,204,870,185,873,172,862,159,852,161,835,142,837,115,820,110,813,115,807,121,796,125,793,138,796,151,792,159,784,151,769,161,764,168,764,182,763,193" shape="poly" onclick="irkutsk()">
+    <area href="#" alt="japan" title="japan" coords="923,171,919,178,925,186,921,197,924,205,921,213,923,220,920,231,915,239,911,250,902,255,898,267,894,276,902,286,904,292,911,286,913,275,924,271,930,264,936,255,945,254,953,241,949,224,946,212,934,199,946,195,953,183,946,174,936,174" shape="poly" onclick="japan()">
+    <area href="#" alt="slam" title="slam" coords="823,442,810,424,813,409,806,397,792,397,779,367,792,344,800,339,817,362,830,346,840,358,835,370,847,386,852,397,856,407,851,425,839,434,832,417,822,407,828,422,831,441" shape="poly" onclick="slam()">
+    <area href="#" alt="yakutsk" title="yakutsk" coords="799,39,812,32,819,34,821,46,828,47,835,43,844,43,844,36,861,37,865,37,874,43,880,47,878,55,869,64,867,71,874,81,874,94,861,96,857,89,844,98,840,113,818,113,808,123,799,125,797,113,791,98,789,88,780,85,791,76,801,77,806,59,807,49" shape="poly" onclick="yakutsk()">
+    <area href="#" alt="kamchatka" title="kamchatka" coords="881,48,889,44,898,50,915,52,923,50,934,47,950,56,963,65,970,65,983,73,981,82,970,89,954,77,963,94,945,116,933,119,936,130,936,148,937,164,929,168,919,156,917,126,928,105,919,105,920,110,915,118,907,109,911,122,900,124,881,122,868,143,877,148,883,148,889,162,896,185,896,211,889,221,879,216,869,211,873,199,873,173,862,158,851,165,851,156,837,141,835,111,843,102,853,88,860,93,873,94,875,82,868,75,868,65,877,56" shape="poly" onclick="kamchatka()">
+    <area href="#" alt="south africa" title="south africa" coords="500,533,504,546,506,558,501,567,498,578,501,594,508,603,505,622,517,641,518,653,529,660,543,658,563,646,581,620,581,604,593,588,610,581,607,553,597,554,584,558,584,573,576,556,567,546,564,554,561,560,553,554,542,554,534,539,521,537,508,529" shape="poly" onclick="southAfrica()">
+    <area href="#" alt="north africa" title="north africa" coords="471,484,449,486,436,482,425,485,409,469,394,446,394,421,392,405,402,396,411,376,419,355,437,353,449,346,457,347,479,342,491,351,508,347,508,358,500,366,492,378,495,393,504,405,517,410,534,423,539,427,542,446,540,464,521,477,518,497,508,503,493,505,493,494" shape="poly" onclick="northAfrica()">
+    <area href="#" alt="east africa" title="east africa" coords="589,413,567,417,551,415,538,425,540,451,539,463,551,475,555,487,574,495,584,496,577,509,570,518,563,527,567,537,572,546,577,561,580,572,584,557,593,555,601,550,601,537,615,516,635,500,644,479,648,461,623,466,611,449,601,442,597,432,594,419" shape="poly" onclick="eastAfrica()">
+    <area href="#" alt="congo" title="congo" coords="542,463,553,480,555,488,561,492,580,493,584,502,567,527,564,543,561,544,564,543,563,553,563,559,555,556,546,557,539,553,536,543,529,536,521,538,513,532,500,528,491,515,491,507,504,504,521,498,521,479" shape="poly"  onclick="congo()">
+    <area href="#" alt="madag" title="madag" coords="654,555,665,563,665,576,663,584,658,593,658,600,644,633,635,643,622,644,614,634,612,621,622,606,626,584,638,580,646,568,654,563" shape="poly" onclick="madagascar()">
+    <area href="#" alt="egypt" title="egypt" coords="527,419,517,410,508,409,500,399,491,378,504,366,512,366,529,376,536,370,546,372,563,376,572,374,578,388,580,397,587,414,565,416,551,416,538,425" shape="poly" onclick="egypt()">
+    <area href="#" alt="brazil" title="brazil" coords="301,392,288,400,264,402,258,389,250,396,243,400,233,404,224,404,220,417,216,421,205,426,200,438,208,444,216,444,220,457,237,451,247,459,258,463,271,476,279,497,288,508,290,518,284,531,290,539,298,559,305,542,313,529,313,515,326,506,336,506,351,474,351,461,368,446,373,432,356,415,332,412,318,408" shape="poly" onclick="brazil()">
+    <area href="#" alt="argentina" title="argentina" coords="216,489,220,524,220,546,218,557,212,573,224,598,220,621,224,625,226,645,241,660,254,664,259,659,250,647,252,632,258,621,251,615,258,605,255,591,267,586,284,581,288,569,296,553,288,537,280,526,273,520,271,510,254,499,239,495,234,501" shape="poly" onclick="argentina()">
+    <area href="#" alt="peru" title="peru" coords="289,517,275,526,273,510,260,507,254,500,241,498,237,502,217,488,201,473,186,460,179,445,167,435,166,416,178,397,212,420,201,434,209,443,217,443,216,452,224,456,237,449,254,460,259,462,275,483,275,496,284,500" shape="poly" onclick="peru()">
+    <area href="#" alt="venezuela" title="venezuela" coords="182,397,186,390,183,379,196,363,216,350,237,362,252,361,262,366,272,375,280,380,296,380,301,387,290,399,273,403,264,399,258,387,252,391,241,392,243,400,233,404,224,399,222,407,220,418,212,417,195,409" shape="poly" onclick="venezuela()">
+    <area href="#" alt="western us" title="western us" coords="106,190,195,190,195,237,186,242,178,242,178,250,170,255,165,268,161,276,161,287,152,285,144,278,131,278,121,274,107,266,101,253,101,225,103,209,107,200" shape="poly" onclick="westernUS()">
+  	<area href="#" alt="alberta" title="alberta" coords="93,119,127,119,135,122,182,123,182,143,178,147,178,168,178,190,106,190,104,175,95,166,106,153,97,140,101,128" shape="poly" onclick="alberta()">
+    <area href="#" alt="western australia" title="western australia" coords="898,526,898,536,899,549,899,565,903,587,945,589,941,617,945,640,936,646,925,638,913,629,894,628,881,634,875,644,865,642,856,653,843,650,847,637,834,621,828,600,823,587,834,579,852,568,862,552,858,561,868,544,879,530,887,538" shape="poly" onclick="westernAustralia()">
+    <area href="#" alt="eastern australia" title="eastern australia" coords="898,523,898,543,902,551,903,586,945,590,940,619,945,638,937,646,940,655,950,661,966,661,983,657,1000,619,997,587,987,573,985,566,970,557,966,540,953,513,945,553,923,538,932,526,915,518" shape="poly" onclick="easternAustralia()">
+    <area href="#" alt="indonesia" title="indonesia" coords="775,465,796,477,814,503,822,482,844,457,858,462,856,477,860,485,873,485,877,479,882,485,875,498,869,508,873,515,873,523,864,521,864,542,851,546,839,544,827,546,818,537,794,508,772,478" shape="poly" onclick="indonesia()">
+    <area href="#" alt="new guinea" title="new guinea" coords="877,451,887,439,898,443,911,443,930,448,937,455,945,457,946,466,955,474,955,487,961,493,958,503,949,503,940,493,932,498,916,496,904,491,902,472,887,468" shape="poly" onclick="newGuinea()">
+</map>
+
+
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+  	<span id='close' class="close">×</span>
+    <form id='myform' method='POST' action='#'>
+	    <input type='button' value='-' class='qtyminus' field='quantity' />
+	    <input type='text' id="value" name='quantity' value='0' class='qty' />
+	    <input type='button' value='+' class='qtyplus' field='quantity' /><br><br>
+	    <input type='button' id="deploy" value='Deploy' class='deploy' />
+	</form>
+  </div>
+
+</div>
+
+<div id="middleEastText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="indiaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="afghanistanText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="chinaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="uralText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="siberiaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="mongoliaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="irkutskText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="japanText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="slamText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="yakutskText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="kamchatkaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="southAfricaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="northAfricaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="eastAfricaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="congoText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="madagascarText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="egyptText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="brazilText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="argentinaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="peruText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="venezuelaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="westernUSText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="albertaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="westernAustraliaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="easternAustraliaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
+<div id="indonesiaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+<div id="newGuineaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+
+<script>
+$('#planetmap').mapster({
+    fillOpacity: 0,
+     stroke: true,
+     strokeColor: "00001f",
+     strokeOpacity: 1,
+     strokeWidth: 4,
+            
+  });
+
+  </script>
+</body>
+</html>
