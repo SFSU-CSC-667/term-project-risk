@@ -34,7 +34,4 @@ jQuery(document).ready(function(){
             $('input[name='+fieldName+']').val(0);
         }
     });
-
-    
-
 });
