@@ -1,3 +1,14 @@
+html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+.container {
+    width: 600px;
+    height: 337.5px;
+}
+
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -59,6 +70,8 @@
     color: red;
     font-size: 25px;
     font-weight: 700;
+}
+svg { display:block; border:1px solid #ccc; background:#fff;
 }
 input.qtyplus { width:25px; height:25px; background-color: lightgreen; border-radius: 3px;}
 input.qtyminus { width:25px; height:25px; background-color: #FF3333; border-radius: 3px;}

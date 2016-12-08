@@ -1,5 +1,13 @@
 
 jQuery(document).ready(function(){
+    //Repositioning the texts according to the image size
+    var height = (675/$("#planetmap").height());
+    var width = (1200/$("#planetmap").width());
+    var text_array = $('.text');
+    for(var i=0;i<text_array.length;i++) {
+        $(text_array[i]).css({top: ($(text_array[i]).offset().top/height), left: ($(text_array[i]).offset().left/width)})
+    }
+
     // This button will increment the value
     $('.qtyplus').click(function(e){
         // Stop acting like a button
