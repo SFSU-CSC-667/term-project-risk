@@ -30,14 +30,25 @@
         <div class="col-md-9" style="height: 100%;">
           <div class="col-md-12 panel panel-default">
             <div class="panel-body">
-              Game Controls
+              <ul class="nav nav-pills">
+                <li role="presentation" class="disabled"><a href="#">Draft</a></li>
+                <li role="presentation" class="disabled"><a href="#">Attack</a></li>
+                <li role="presentation" class="disabled"><a href="#">Fortify</a></li>
+              </ul>
+              <!-- TODO Hook these up to the server via handlebars/socket -->
+              <div id="draftText" class="hidden"> You may draft X units this turn. Please click on the map to place them. 
+                <br> <button type="button" class="btn btn-danger">End Phase</button></div>
+              <div id="attackText" class="hidden"> You may now attack! Please click on the territory you want to attack from, then an adjacent territory you are attacking. <br> <button type="button" class="btn btn-danger">End Phase</button></div>
+              <div id="fortifyText" class="hidden"> You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into. <br> <button type="button" class="btn btn-danger">End Turn</button></div>
+              <div id="waitingText" class="hidden"> It is not your turn yet. </div>
+
             </div>
           </div>
         </div>
         <div class="col-md-3">
           <div class="col-md-12 panel panel-default">
             <ul class="list-group">
-              <li class="list-group-item">Player 1</li>
+              <li class="list-group-item active">Player 1</li>
               <li class="list-group-item">Player 2</li>
               <li class="list-group-item">Player 3</li>
               <li class="list-group-item">Player 4</li>
@@ -122,16 +133,23 @@
               <div id="easternAustraliaText" class="text" style="position: absolute;top: 400px;left: 630px"></div>
               <div id="indonesiaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
               <div id="newGuineaText" class="text" style="position: absolute;top: 420px;left: 750px"></div>
+             
               <script>
-              $('#planetmap').mapster({
-              fillOpacity: 0,
-              stroke: true,
-              strokeColor: "00001f",
-              strokeOpacity: 1,
-              strokeWidth: 4,
-              
-              });
-              </script>
+                $('#planetmap').mapster({
+                   fillOpacity: 0,
+                   stroke: true,
+                   strokeColor: "00001f",
+                   strokeOpacity: 1,
+                   strokeWidth: 4,
+                 onMouseover: function(){
+                     $(this).mapster('set', false).mapster('set', true);
+                       },
+                  onMouseout: function (e) {
+                            $(this).mapster('set', false);
+                        },
+                           
+                 });
+               </script>
             </div>
           </div>
         </div>
