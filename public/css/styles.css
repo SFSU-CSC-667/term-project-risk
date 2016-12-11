@@ -61,6 +61,51 @@
     font-size: 25px;
     font-weight: 700;
 }
+
+#chatFrame {
+    width: 275px;
+    height: 515px;
+    border: 3px solid #000000;
+    margin-left: -15px;
+    position: relative;
+}
+
+#messages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#messages li {
+    padding: 5px 10px;
+}
+
+#messages li:nth-child(odd) {
+    background: #eee;
+}
+
+#messageForm {
+    position: absolute;
+    bottom: 0;
+}
+
+#text {
+    border: 2px solid gray;
+    height: 40px;
+    width: 220px;
+    padding-left: 5px;
+}
+
+#sendButton {
+    height: 40px;
+    border: 2px solid gray;
+    background-color: #6294e5;
+    color: white;
+}
+
+#sendButton:hover {
+    background-color: #337AB7 !important
+  }
 input.qtyplus { width:25px; height:25px; background-color: lightgreen; border-radius: 3px;}
 input.qtyminus { width:25px; height:25px; background-color: #FF3333; border-radius: 3px;}
 input.deploy { width:100px; height:25px;}
