@@ -3,12 +3,12 @@
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="../public/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="../public/js/jQuery.js"></script>
-    <script type="text/javascript" src="../public/js/imagemapster.js"></script>
-    <script type="text/javascript" src="../public/js/scripts.js"></script>
-    <!--<script src="../socket.io/socket.io.js"></script>-->
+    <script type="text/javascript" src="/js/jQuery.js"></script>
+    <script type="text/javascript" src="/js/imagemapster.js"></script>
+    <script type="text/javascript" src="/js/scripts.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
   </head>
   <style>
   body {
@@ -62,7 +62,7 @@
         <div class="col-md-9" id="mapdiv">
           <div class="col-md-12 panel panel-default">
             <div class="panel-body">
-              <img id="planetmap" src="../public/img/risk.jpg" class="img-responsive" alt="Planets" usemap="#planetmap">
+              <img id="planetmap" src="/img/risk.jpg" class="img-responsive" alt="Planets" usemap="#planetmap">
               
                 <map name="planetmap">
                     <area href="#" id="27" name="middleEast" alt="middleEast" title="middleEast" coords="543,292,551,300,576,292,587,298,603,300,628,294,644,303,652,297,666,298,673,305,678,318,680,334,684,343,686,360,679,368,669,373,661,368,650,368,648,348,640,351,640,365,650,375,662,379,669,381,678,389,682,406,674,416,666,425,654,438,641,444,623,444,611,421,597,404,584,389,572,375,580,358,580,339,573,336,567,339,553,336,536,330,531,317,536,305,543,300" shape="poly" onclick="territoryClicked('middleEast')">
@@ -200,7 +200,7 @@
         </div>
       </div>
     </div>
-    <!--<script>
+    <script>
     	var socket = io();
     	$('form').submit(function(){
     		socket.emit('chat message', $('#text').val());
@@ -210,6 +210,6 @@
   		socket.on('chat message', function(msg){
   			$('#messages').append($('<li>').text(msg));
   		});
-    </script>-->
+    </script>
   </body>
 </html>
