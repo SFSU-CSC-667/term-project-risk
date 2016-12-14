@@ -342,8 +342,13 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Create a game!' });
 });
 
+router.get('/territories', function(req, res, next) {
+  res.send(map);
+});
+
 router.get('/:id', function(req, res, next) {
   res.render('game', { title: 'Create a game!' });
+  console.log("req.params.id");
   //Eventually the code will work like this
   /*
   game = games[req.params.id];
@@ -353,10 +358,6 @@ router.get('/:id', function(req, res, next) {
     res.render('index', { title: 'Create a game!' });
   }
   */
-});
-
-router.get('/territories', function(req, res, next) {
-  res.send(map);
 });
 
 router.post('/events', function(req, res, next) {
