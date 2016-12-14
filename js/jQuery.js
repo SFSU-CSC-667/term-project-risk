@@ -3,9 +3,11 @@ jQuery(document).ready(function(){
     //Repositioning the texts according to the image size
     var height = (675/$("#planetmap").height());
     var width = (1200/$("#planetmap").width());
+    var size = parseInt($(".text").css('font-size'));
     var text_array = $('.text');
     for(var i=0;i<text_array.length;i++) {
-        $(text_array[i]).css({top: ($(text_array[i]).offset().top/height), left: ($(text_array[i]).offset().left/width)})
+        $(text_array[i]).css({top: (($(text_array[i]).offset().top/height)-10), left: (($(text_array[i]).offset().left/width)-10)});
+        $(".text").css('font-size', size/height);
     }
 
     // This button will increment the value
