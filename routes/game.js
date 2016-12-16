@@ -1,5 +1,6 @@
 var express = require('express');
 var world = require("./map.js");
+var io = require('../app');
 var router = express.Router();
 var maxGameID = 1;
 var games = {};
@@ -17,6 +18,12 @@ console.log(map.isAjacent(2, 1));
 //And we can also count how many territories someone has
 console.log(map.territoriesOwned(1));
 
+// Socket stuff
+io.on('connection', function(socket) {
+    socket.on('chat message', function(msg) {
+      io.emit('chat message', msg);
+    });
+  });
 
 function createGame() {
   var game = {};
