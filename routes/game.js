@@ -1,30 +1,22 @@
 var express = require('express');
 var world = require("./map.js");
-var io = require('../app');
 var router = express.Router();
 var maxGameID = 1;
-var games = [];
+var games = {};
 
 //This creates a new game map with our gameid. No players are assigend to this map
-//var map = new world.Map("1");
+var map = new world.Map("1");
 //You can give players control of a territory using it's ID
 //Giving playerid 1 control of territory 2
-//map.setPlayer(1, 2);
+map.setPlayer(1, 2);
 //Let's add some troops to his territory
 //Giving territory 2, 6 troops
-//map.addTroops(2, 6);
+map.addTroops(2, 6);
 //We can determine if the territory is ajacent to another territory
-//console.log(map.isAjacent(2, 1));
+console.log(map.isAjacent(2, 1));
 //And we can also count how many territories someone has
-//console.log(map.territoriesOwned(1));
+console.log(map.territoriesOwned(1));
 
-// Socket stuff
-io.on('connection', function(socket) {
-  io.emit('chat message', 'Welcome to the game!');
-    socket.on('chat message', function(msg) {
-      io.emit('chat message', msg);
-    });
-});
 
 function createGame() {
   var game = {};
@@ -68,11 +60,20 @@ function removePlayer(gameId, player) {
 }
 
 function startTurn(gameId, player) {
+  //set player 
   
 }
 
-function draft(gameId, player) {
-  
+function draft(gameId, player, territory, amount) {
+  var game = games[gameId];
+  var player = game.players[player];
+
+  //Should we add check?
+  if(!game.territories.isOwned()) return false;
+
+  game.territories.addTroops(territory, amount);
+
+  return true;
 }
 
 function endTurn(gameID, player) {
@@ -104,17 +105,17 @@ function endGame(gameId) {
 }
 
 
-function setTerritories(game) {
+function initTerritories(game) {
   //var game = games[gameId];
 
   var playerIndex = 0;
   var territoryIndex = 1;
-  var totalTerritories = game.territories.territories.length;
+  var totalTerritories = game.territories.length;
   var totalTroops = 120;
 
   for (i = 0; i < totalTroops; i++) {
     game.territories.setPlayer(playerIndex, territoryIndex);
-    game.territories.addTroops(territoryIndex, 1);
+    addTroops(territoryIndex, 1);
     
     playerIndex++;
     territoryIndex++;
@@ -141,7 +142,7 @@ function attack(gameId, attackingTerritory, defendingTerrritory, attackingTroops
 
 }
 
-function simulate (attackingTroops, defendingTroops) {
+function simulate(attackingTroops, defendingTroops) {
 
   //Attacking Troops = 2
   if (attackingTroops == 2) {
@@ -350,15 +351,8 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Create a game!' });
 });
 
-router.get('/:id/territories', function(req, res, next) {
-  var currentGame = createGame();
-  setTerritories(currentGame);
-  res.send(currentGame);
-});
-
 router.get('/:id', function(req, res, next) {
-  game = games[req.params.id];
-  res.render('game', { key: 'This could be a value!' });
+  res.render('game', { title: 'Create a game!' });
   //Eventually the code will work like this
   /*
   game = games[req.params.id];
@@ -368,6 +362,10 @@ router.get('/:id', function(req, res, next) {
     res.render('index', { title: 'Create a game!' });
   }
   */
+});
+
+router.get('/territories', function(req, res, next) {
+  res.send(map);
 });
 
 router.post('/events', function(req, res, next) {
@@ -388,8 +386,7 @@ router.post('/events', function(req, res, next) {
       res.send(draft(res.body.event.gameid, res.body.event.player, res.body.event.territory, res.body.event.amount));
       break;
     case "Attack":
-      //not implemented
-      //res.send();
+      res.send(attack(res.body.event.gameid, res.body.event.territory, res.body.event.territory, res.body.event.amount, res.body.event.amount));
       break;
     case "BattleResult":
       //not implemented
