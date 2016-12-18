@@ -14,10 +14,21 @@ socket.on('chat message', function(msg) {
 function territoryClicked(name) {
     console.log(name);
     if (game.currentPhase == "draft") {
+    	//Decrease draft-amount span accordingly when drafting
+    	//only let me deploy/draft on territories I control
+    	//only allow me to draft when I have draft-amount > 0
+    	 //while $('#draft-amount').text() > 0
+    	//Don't let me reduce my troop count more than prexisting
+    	//use game.territories to get information
         deploy(name);
     } else if (game.currentPhase == "attack") {
         //attack model
     } else if (game.currentPhase == "reinforce") {
+    	//Have them click again
+    	//Get their second click and call the next function on that second selection?
+		//Click a source territory and a target territory
+		//Enter an amount of troops to transfer to the new territory
+		//THERE MUST BE AT LEAST ONE TROOP REMAINING IN THE SOURCE TERRITORY
         reinforce(name);
     }
 }
@@ -80,7 +91,7 @@ function setTroops(territoryID, value) {
     item.textContent = value;
 }
 
-function draft(data) {
+function draftText(data) {
     $("#setupText").hide();
     $('#waitingText').hide();
     $('#draftText').show();
@@ -96,7 +107,7 @@ function initDraft(playerID, gameid) {
     $.post(
         "/game/draft",
         body,
-        draft
+        draftText
     );
     //enable tab, show text, calculate draft amount, do draft, end phase, go to attack
 
