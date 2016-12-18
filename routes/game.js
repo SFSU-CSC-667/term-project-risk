@@ -21,9 +21,9 @@ var games = [];
 
 // Socket stuff
 io.on('connection', function(socket) {
-    io.emit('chat message', 'Welcome to the game!');
+  io.to(socket.id).emit('welcome', 'Welcome to the game!');
     socket.on('chat message', function(msg) {
-        io.emit('chat message', msg);
+      io.emit('chat message', msg);
     });
 });
 

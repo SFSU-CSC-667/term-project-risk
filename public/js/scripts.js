@@ -7,7 +7,10 @@ colors[1] = "blue";
 colors[2] = "yellow";
 colors[3] = "green";
 var currentPlayers = 0;
-socket.on('chat message', function(msg) {
+socket.on('welcome', function(msg){
+    $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
+});
+socket.on('chat message', function(msg){
     $('#messages').append($('<li>').text(msg));
 });
 
