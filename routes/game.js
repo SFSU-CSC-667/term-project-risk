@@ -7,20 +7,20 @@ var maxGameID = 0;
 var games = [];
 games[0] = createGame();
 playerone = {
-  id: 1, 
-  game: 0, 
+  id: 1,
+  game: 0,
   name: 'Childish Gambino'
 };
 games[0].players.push(playerone);
 playertwo = {
-  id: 2, 
-  game: 0, 
+  id: 2,
+  game: 0,
   name: 'Lil Yachty'
 };
 games[0].players.push(playertwo);
 playerthree = {
-  id: 3, 
-  game: 0, 
+  id: 3,
+  game: 0,
   name: 'Paper Boi'
 };
 games[0].players.push(playerthree);
@@ -65,6 +65,7 @@ function startGame(gameID) {
   console.log(gameID);
   var gameEvent = new Event(gameID, 'StartGame');
   io.emit("Game Starting", gameEvent);
+  game.currentPhase = "draft";
   //return player to start turn or do that here
 }
 
@@ -97,12 +98,12 @@ function removePlayer(gameId, player) {
   var gameEvent = new Event(gameid, 'PlayerLeft');
   gameEvent.player = player;
 
-  return true; 
+  return true;
 }
 
 function startTurn(gameId, player) {
-  //set player 
-  
+  //set player
+
 }
 
 function draft(gameId, player, territory, amount) {
@@ -127,7 +128,7 @@ function draft(gameId, player, territory, amount) {
 function endTurn(gameID, player) {
   var game = games[gameID];
   var playerIndex = game.players.indexOf(player);
-  
+
   if(++playerIndex > 3)
     playerIndex = 0;
 
@@ -141,10 +142,10 @@ function endTurn(gameID, player) {
   io.emit('Draft Move', gameEvent);
 
   return true;
-  
+
 }
 
-//Assumes player has no remaining territories 
+//Assumes player has no remaining territories
 function playerElimination(gameID, player) {
   return removePlayer(gameid,player);
 }
@@ -170,7 +171,7 @@ function initTerritories(game) {
   for (i = 0; i < totalTroops; i++) {
     game.territories.setPlayer(playerIndex, territoryIndex);
     game.territories.addTroops(territoryIndex, 1);
-    
+
     playerIndex++;
     territoryIndex++;
 
@@ -185,12 +186,12 @@ function attack(gameId, attackingTerritory, defendingTerrritory, attackingTroops
   var game = games[gameId];
 
   var result = simulate(attackingTroops, defendingTroops);
-  //results = array containing num of remaining troops in territories 
+  //results = array containing num of remaining troops in territories
 
   game.addTroops(attackingTerritory, attackingTroops - result[0]); //attackingTroops in result[0]
   game.addTroops(defendingTerrritory, defendingTroops - result[1]); //defendingTroops in result[1]
 
-  //Check for territories 
+  //Check for territories
 
   return true;
 
@@ -200,7 +201,7 @@ function simulate(attackingTroops, defendingTroops) {
 
   //Attacking Troops = 2
   if (attackingTroops == 2) {
-    
+
     //Defending Troops = 1
     if (defendingTroops < 2)
       return attacking1v1(attackingTroops, defendingTroops);
@@ -220,7 +221,7 @@ function simulate(attackingTroops, defendingTroops) {
     //Defending Troops > 1
     else
       return attacking2v2(attackingTroops, defendingTroops);
-  } 
+  }
 
   //Attacking Troop > 3
   else {
@@ -230,14 +231,14 @@ function simulate(attackingTroops, defendingTroops) {
       return attacking3v1(attackingTroops, defendingTroops);
 
     //Defending Troops > 1
-    else 
+    else
       return attacking3v2(attackingTroops, defendingTroops);
   }
 }
 
 function attacking1v1(attackingTroops, defendingTroops) {
   var result = [attackingTroops, defendingTroops];
-  
+
   var attack = diceRoll();
   var defense = diceRoll();
 
@@ -247,30 +248,30 @@ function attacking1v1(attackingTroops, defendingTroops) {
   //console.log('Defending Die: '+defense.toString());
 
   if (attack > defense) --result[1];  //Attacker wins
-  
+
   else --result[0];  //Defender wins
-      
+
   return result;
 }
 
 function attacking1v2(attackingTroops, defendingTroops) {
   var result = [attackingTroops, defendingTroops];
-  
+
   var attack = diceRoll();
   var defense = [diceRoll(), diceRoll()];
-      
+
   defense.sort(function(a, b){return b - a});
 
   //Push Rolls to Socket
 
   //console.log('Attacking Die: '+attack.toString());
   //console.log('Defending Dice: '+defense.toString());
-      
-  if (attack > defense[0]) --result[1];
-  
-  else --result[0];  
 
-  return result;  
+  if (attack > defense[0]) --result[1];
+
+  else --result[0];
+
+  return result;
 }
 
 function attacking2v1(attackingTroops,defendingTroops) {
@@ -287,7 +288,7 @@ function attacking2v1(attackingTroops,defendingTroops) {
   //console.log('Defending Die: '+defense.toString());
 
   if (attack[0] > defense) --result[1];
-  
+
   else --result[0];
 
   return result;
@@ -298,7 +299,7 @@ function attacking2v2(attackingTroops,defendingTroops) {
 
   var attack = [diceRoll(), diceRoll()];
   var defense = [diceRoll(), diceRoll()];
-      
+
   attack.sort(function(a, b){return b - a});
   defense.sort(function(a, b){return b - a});
 
@@ -306,16 +307,16 @@ function attacking2v2(attackingTroops,defendingTroops) {
 
   //console.log('Attacking Dice: '+attack.toString());
   //console.log('Defending Dice: '+defense.toString());
-      
+
   //Compares highest die
   if (attack[0] > defense[0]) {
-  
+
     --result[1];  //Highest attacker wins
-    
+
     //Compares second highest die
     if (attack[1] > defense[1]) {
       --result[1];  //Second highest attacker wins
-    } else { 
+    } else {
       --result[0];  //Second highest defender wins
     }
 
@@ -325,8 +326,8 @@ function attacking2v2(attackingTroops,defendingTroops) {
     --result[0]; //Highest defender wins
 
     //Compares second highest die
-    if (attack[1] > defense[1]) --result[1]; 
-    
+    if (attack[1] > defense[1]) --result[1];
+
     else --result[0];
 
     return result;
@@ -347,9 +348,9 @@ function attacking3v1(attackingTroops,defendingTroops) {
   //console.log('Defending Die: '+defense.toString());
 
   if (attack[0] > defense) --result[1];
-  
+
   else --result[0];
-      
+
   return result;
 }
 
@@ -358,7 +359,7 @@ function attacking3v2(attackingTroops,defendingTroops) {
 
   var attack = [diceRoll(), diceRoll(), diceRoll()];
   var defense = [diceRoll(), diceRoll()];
-      
+
   attack.sort(function(a, b){return b - a});
   defense.sort(function(a, b){return b - a});
 
@@ -366,14 +367,14 @@ function attacking3v2(attackingTroops,defendingTroops) {
 
   //console.log('Attacking Dice: '+attack.toString());
   //console.log('Defending Dice: '+defense.toString());
-      
+
   //Compares highest die
   if (attack[0] > defense[0]) {
     --result[1];
 
     //Compares second highest die
     if (attack[1] > defense[1]) {
-      --result[1]; 
+      --result[1];
     } else {
       --result[0];
     }
@@ -382,10 +383,10 @@ function attacking3v2(attackingTroops,defendingTroops) {
 
   } else {
     --result[0];
-        
+
     //Compares second highest die
     if (attack[1] > defense[1]) {
-      --result[1]; 
+      --result[1];
     } else {
       --result[0];
     }
@@ -405,7 +406,7 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
-  
+
 router.get('/:id/territories', function(req, res, next) {
   var game = games[req.params.id];
     if (game != null) {
@@ -446,7 +447,7 @@ router.post('/events', function(req, res, next) {
     case "CreateGame":
       res.send(createGame());
       break;
-    case "PlayerJoined": 
+    case "PlayerJoined":
       res.send(addPlayer(req.body.gameid, req.body.player));
       break;
     case "PlayerLeft":
@@ -482,7 +483,7 @@ router.post('/events', function(req, res, next) {
     case "PlayerWon":
       res.send(playerVictory(res.body.event.gameid, res.body.event.player));
       break;
-	   default: 
+	   default:
 	       console.log("this shouldn't happen");
 	}
 });
