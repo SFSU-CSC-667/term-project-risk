@@ -85,8 +85,8 @@ function addPlayer(gameID, player) {
 	return true;
 }
 
-function removePlayer(gameId, player) {
-  var game = games[gameId];
+function removePlayer(gameID, player) {
+  var game = games[gameID];
   var index = game.players.indexOf(player); //may not work because of object reference. But I think it should. not tested
   game.players.splice(index, 1);
 
@@ -101,13 +101,13 @@ function removePlayer(gameId, player) {
   return true;
 }
 
-function startTurn(gameId, player) {
+function startTurn(gameID, player) {
   //set player
 
 }
 
-function draft(gameId, player, territory, amount) {
-  var game = games[gameId];
+function draft(gameID, player, territory, amount) {
+  var game = games[gameID];
   var player = game.players[player];
 
   //Should we add check?
@@ -115,7 +115,7 @@ function draft(gameId, player, territory, amount) {
 
   game.territories.addTroops(territory, amount);
 
-  var gameEvent = new Event(gameId, 'DraftMove');
+  var gameEvent = new Event(gameID, 'DraftMove');
   gameEvent.player = player;
   gameEvent.territory = territory;
   gameEvent.amount = amount;
@@ -134,12 +134,10 @@ function endTurn(gameID, player) {
 
   game.currentPlayer = game.players[playerIndex].id;
 
-  var gameEvent = new Event(gameID, 'DraftMove');
+  var gameEvent = new Event(gameID, 'EndTurn');
   gameEvent.player = player;
-  gameEvent.territory = territory;
-  gameEvent.amount = amount;
-
   io.emit('Draft Move', gameEvent);
+  game.currentPhase = "draft";
 
   return true;
 
@@ -147,19 +145,28 @@ function endTurn(gameID, player) {
 
 //Assumes player has no remaining territories
 function playerElimination(gameID, player) {
-  return removePlayer(gameid,player);
+  return removePlayer(gameID,player);
 }
 
 function playerVictory(gameID, player) {
   //Do something with player
-  return endGame(gameId);
+  return endGame(gameID);
 }
 
-function endGame(gameId) {
-  delete games[gameId];
+function endGame(gameID) {
+  delete games[gameID];
   return true;
 }
 
+function calculateDraft(gameID, player) {
+  var game = games[gameID];
+  var totalTerritories = games.territories.territoriesOwned(player);
+  var result = totalTerritories / 3 ;
+
+  if(result < 3) { result = 3; }
+
+  return result;
+}
 
 function initTerritories(game) {
 //var game = games[gameId];
@@ -181,9 +188,9 @@ function initTerritories(game) {
   }
 }
 
-function attack(gameId, attackingTerritory, defendingTerrritory, attackingTroops, defendingTroops){
+function attack(gameID, attackingTerritory, defendingTerrritory, attackingTroops, defendingTroops){
   //Assumes that territories are adjecent and not owned by same player
-  var game = games[gameId];
+  var game = games[gameID];
 
   var result = simulate(attackingTroops, defendingTroops);
   //results = array containing num of remaining troops in territories
