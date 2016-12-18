@@ -32,6 +32,29 @@
       -1px 1px 0 #000,
       1px 1px 0 #000;  
   }
+  .colorbox {
+    float: left;
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+  }
+
+  .red {
+    background: red;
+  }
+
+  .blue {
+    background: blue;
+  }
+
+  .yellow {
+    background: yellow;
+  }
+  
+  .green {
+    background: green;
+  }
   </style>
   <body>
     <input type="hidden" id="gameid" value="{{gameid}}">
@@ -41,9 +64,9 @@
           <div class="col-md-12 panel panel-default">
             <div class="panel-body">
               <ul class="nav nav-pills">
-                <li role="presentation" class="disabled"><a href="#">Draft</a></li>
-                <li role="presentation" class="disabled"><a href="#">Attack</a></li>
-                <li role="presentation" class="disabled"><a href="#">Fortify</a></li>
+                <li role="presentation" id="draftpill" class="disabled"><a href="#">Draft</a></li>
+                <li role="presentation" id ="attackpill" class="disabled"><a href="#">Attack</a></li>
+                <li role="presentation" id="fortifypill" class="disabled"><a href="#">Fortify</a></li>
               </ul>
               <!-- TODO Hook these up to the server via handlebars/socket -->
               <div id="setupText" class="hidden"> Currently waiting for other players to join the game. The game will begin automatically when there are four players. </div>

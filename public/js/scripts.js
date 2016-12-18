@@ -1,70 +1,78 @@
 var socket = io();
 var game = {};
 game.players = {};
-game.players[0] = "red";
-game.players[1] = "blue";
-game.players[2] = "yellow";
-game.players[3] = "green";
+var colors = {};
+colors[0] = "red";
+colors[1] = "blue";
+colors[2] = "yellow";
+colors[3] = "green";
+var currentPlayers = 0;
 socket.on('chat message', function(msg) {
     $('#messages').append($('<li>').text(msg));
 });
 
 function territoryClicked(name) {
-	console.log(name);
-	//deploy(name);
-	reinforce(name);
+    console.log(name);
+    if (game.currentPhase == "draft") {
+        deploy(name);
+    } else if (game.currentPhase == "attack") {
+        //attack model
+    } else if (game.currentPhase == "reinforce") {
+        reinforce(name);
+    }
 }
 
 
 function deploy(name) {
-	//Assigns the current value to the input, or zero if it isn't set
-	document.getElementById('deployValue').value = document.getElementById(name + "Text").textContent == "" ? 
-		0 : document.getElementById(name + "Text").textContent;
-	var modal = document.getElementById('deployModal');
-	modal.style.display = "block";
-	///Hides when you click Deploy button
-	document.getElementById('deploy').onclick = function() { 
-		document.getElementById('deployModal').style.display = "none";
-		console.log("Deployed "+document.getElementById('deployValue').value+" in " + name);
-		document.getElementById(name + 'Text').textContent = document.getElementById('deployValue').value;
-	}
-	//Hides model when you click away or click the close button
-	document.getElementsByClassName("close")[0].onclick = function() { 
-		modal.style.display = "none";
-	}
-	window.onclick = function(event) {
-	    if (event.target == modal) {
-	        modal.style.display = "none";
-	    }
-	}
+    //Assigns the current value to the input, or zero if it isn't set
+    document.getElementById('deployValue').value = document.getElementById(name + "Text").textContent == "" ?
+        0 : document.getElementById(name + "Text").textContent;
+    var modal = document.getElementById('deployModal');
+    modal.style.display = "block";
+    ///Hides when you click Deploy button
+    document.getElementById('deploy').onclick = function() {
+            document.getElementById('deployModal').style.display = "none";
+            console.log("Deployed " + document.getElementById('deployValue').value + " in " + name);
+            document.getElementById(name + 'Text').textContent = document.getElementById('deployValue').value;
+        }
+        //Hides model when you click away or click the close button
+    document.getElementsByClassName("close")[0].onclick = function() {
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 }
 
 function reinforce(name) {
-	var troopsRemaining = 3;
-	//Assigns the current value to the input, or zero if it isn't set
-	document.getElementById('reinforceValue').value = troopsRemaining == 0 ? 
-		0 : troopsRemaining;
-	var modal = document.getElementById('reinforceModal');
-	modal.style.display = "block";
-	///Hides when you click Deploy button
-	document.getElementById('reinforce').onclick = function() { 
-		document.getElementById('reinforceModal').style.display = "none";
-		console.log("Reinforced "+document.getElementById('reinforceValue').value+" in " + name);
-		document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent)+parseInt(document.getElementById('reinforceValue').value);
-	}
-	//Hides model when you click away or click the close button
-	document.getElementsByClassName("close")[1].onclick = function() { 
-		modal.style.display = "none";
-	}
-	window.onclick = function(event) {
-	    if (event.target == modal) {
-	        modal.style.display = "none";
-	    }
-	}
+    var troopsRemaining = 3;
+    //Assigns the current value to the input, or zero if it isn't set
+    document.getElementById('reinforceValue').value = troopsRemaining == 0 ?
+        0 : troopsRemaining;
+    var modal = document.getElementById('reinforceModal');
+    modal.style.display = "block";
+    ///Hides when you click Deploy button
+    document.getElementById('reinforce').onclick = function() {
+            document.getElementById('reinforceModal').style.display = "none";
+            console.log("Reinforced " + document.getElementById('reinforceValue').value + " in " + name);
+            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('reinforceValue').value);
+        }
+        //Hides model when you click away or click the close button
+    document.getElementsByClassName("close")[1].onclick = function() {
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 }
 
 function setColor(territoryID, playerID) {
-    $('#' + document.getElementById(territoryID).alt + 'Text').css("color", game.players[playerID]);
+    var color = $('#player_color_' + playerID).attr('class').split(' ')[1];
+    $('#' + document.getElementById(territoryID).alt + 'Text').css("color", color);
 }
 
 function setTroops(territoryID, value) {
@@ -72,75 +80,82 @@ function setTroops(territoryID, value) {
     item.textContent = value;
 }
 
-function configureGame(gameState) {
-	for (i = 0; i < gameState.players.length; i++){
-		addPlayer(gameState.players[i].id, gameState.players[i].name);
-	}
-	setPlayerActive(gameState.currentPlayer);
-	if (gameState.currentPhase = 'setup') {
-		$("#setupText").show();
-	} else if (gameState.currentPlayer == localStorage.getItem("userID")) {
-		if (gameState.currentPhase = 'draft'){
-			//Do draft
-			$("#setupText").hide();
-			$('#waitingText').hide();
-			$('#draftText').show();
-		} else if (gameState.currentPhase = 'attack') {
-			//Do attack
-			$('#draftText').hide();
-			$('#attackText').show();
-		} else if (gameState.currentPhase = 'fortify') {
-			//Do fortify
-			$('#attackText').hide();
-			$('#fortifyText').show();
-		}
-	} else {
-		$('#waitingText').show();
-	}
+function draft(playerID) {
+    $("#setupText").hide();
+    $('#waitingText').hide();
+    $('#draftText').show();
+    $('#draftpill').removeClass("active").addClass('active');
+    //enable tab, show text, calculate draft amount, do draft, end phase, go to attack
+
 }
 
-function addPlayer(playerID, playerName){
-	document.getElementById('players').innerHTML += '<li class="list-group-item" id="player_'+ playerID +'">'+ playerName + '</li>';
+function initGame(gameState) {
+    for (i = 0; i < gameState.players.length; i++) {
+        addPlayer(gameState.players[i].id, gameState.players[i].name);
+    }
+    drawMap(gameState.territories.territories);
+    setPlayerActive(gameState.currentPlayer);
+    game.currentPhase = gameState.currentPhase;
+    if (gameState.currentPhase == 'setup') {
+        $("#setupText").show();
+    } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
+        if (gameState.currentPhase == 'draft') {
+            draft(gameState.currentPlayer);
+        } else if (gameState.currentPhase == 'attack') {
+            //Do attack
+            $('#draftText').hide();
+            $('#attackText').show();
+        } else if (gameState.currentPhase == 'fortify') {
+            //Do fortify
+            $('#attackText').hide();
+            $('#fortifyText').show();
+        }
+    } else {
+        $('#waitingText').show();
+    }
 }
 
-function removePlayer(playerID, playerName){
-	$('#player_' + playerID).remove();
+function addPlayer(playerID, playerName) {
+    document.getElementById('players').innerHTML += '<li class="list-group-item" id="player_' + playerID + '">' +
+        playerName + '<div id="player_color_' + playerID + '" class="colorbox ' + colors[currentPlayers] + '"></div></li>';
+    currentPlayers++;
+}
+
+function removePlayer(playerID, playerName) {
+    $('#player_' + playerID).remove();
+}
+
+function drawMap(territories) {
+    for (i = 0; i < territories.length; i++) {
+        setTroops(territories[i].id, territories[i].troops)
+        setColor(territories[i].id, territories[i].player);
+    }
 }
 
 function updateMap() {
-	$.get(
-	    "/game/"+game.id+"/territories",
-	    function(data) {
-	    	console.log(data);
-	    	for (i = 0; i < data.territories.length; i++) {
-	    		setTroops(data.territories[i].id, data.territories[i].troops)
-	    		setColor(data.territories[i].id, data.territories[i].player);
-			}
-	       game.territories = data.territories;
-	    }
-	);
+    $.get(
+        "/game/" + game.id + "/territories",
+        function(data) {
+            drawMap(data.territories);
+        }
+    );
 }
 
-function setPlayerActive(playerID){
-	$('.active').each(function(i, obj) {
-	    $(this).removeClass("active");
-	});
-	$('#player_'+playerID).addClass('active');
-}
-
-function startDraft(playerID){
-	$("#draftText").show();
-	//enable tab, show text, calculate draft amount, do draft, end turn, go to attack
+function setPlayerActive(playerID) {
+    $('.active').each(function(i, obj) {
+        $(this).removeClass("active");
+    });
+    $('#player_' + playerID).addClass('active');
 }
 
 socket.on('Game Starting', function(event) {
     updateMap();
     setPlayerActive(event.currentPlayer);
     $("#setupText").hide();
-    if (localStorage.getItem("userID") == event.currentPlayer){
-    	startDraft(event.currentPlayer);
+    if (localStorage.getItem("userID") == event.currentPlayer) {
+        startDraft(event.currentPlayer);
     } else {
-    	$("#waitingText").show();
+        $("#waitingText").show();
     }
 });
 
@@ -167,11 +182,11 @@ jQuery(document).ready(function() {
         "/game/" + $('#gameid').val() + "/state",
         function(data) {
             console.log(data);
-            configureGame(data);
+            initGame(data);
         }
     );
-    
-	// This button will increment the value
+
+    // This button will increment the value
     $('.qtyplus').click(function(e) {
         // Stop acting like a button
         e.preventDefault();

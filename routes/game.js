@@ -5,25 +5,6 @@ var Event = require('./event.js');
 var router = express.Router();
 var maxGameID = 0;
 var games = [];
-games[0] = createGame();
-playerone = {
-  id: 1,
-  game: 0,
-  name: 'Childish Gambino'
-};
-games[0].players.push(playerone);
-playertwo = {
-  id: 2,
-  game: 0,
-  name: 'Lil Yachty'
-};
-games[0].players.push(playertwo);
-playerthree = {
-  id: 3,
-  game: 0,
-  name: 'Paper Boi'
-};
-games[0].players.push(playerthree);
 
 //This creates a new game map with our gameid. No players are assigend to this map
 //var map = new world.Map("1");
@@ -40,379 +21,413 @@ games[0].players.push(playerthree);
 
 // Socket stuff
 io.on('connection', function(socket) {
-  io.emit('chat message', 'Welcome to the game!');
+    io.emit('chat message', 'Welcome to the game!');
     socket.on('chat message', function(msg) {
-      io.emit('chat message', msg);
+        io.emit('chat message', msg);
     });
 });
 
 
 function createGame() {
-  var game = {};
-  game.id = maxGameID;
-  game.territories = new world.Map(maxGameID);
-  game.players = [];
-  game.currentPlayer = 0;
-  game.currentPhase = "setup";
-  games[maxGameID] = game;
-  maxGameID++;
-  return game;
+    var game = {};
+    game.id = maxGameID;
+    game.territories = new world.Map(maxGameID);
+    game.players = [];
+    game.currentPlayer = 0;
+    game.currentPhase = "setup";
+    games[maxGameID] = game;
+    maxGameID++;
+    return game;
 }
 
 function startGame(gameID) {
-  var game = games[gameID];
-  initTerritories(game);
-  console.log(gameID);
-  var gameEvent = new Event(gameID, 'StartGame');
-  io.emit("Game Starting", gameEvent);
-  game.currentPhase = "draft";
-  //return player to start turn or do that here
+    var game = games[gameID];
+    initTerritories(game);
+    console.log(gameID);
+    var gameEvent = new Event(gameID, 'StartGame');
+    io.emit("Game Starting", gameEvent);
+    game.currentPhase = "draft";
+    game.currentPlayer = game.players[0].id;
+    //return player to start turn or do that here
 }
 
 function addPlayer(gameID, player) {
-	var game = games[gameID];
-	//TODO: Need some validation on the player object
-	game.players.push(player);
-	if (game.players.length >= 4) {
-		startGame(gameID);
-	}
+    var game = games[gameID];
+    //TODO: Need some validation on the player object
+    game.players.push(player);
+    //TEST CODE
+    playerone = {
+        id: 1,
+        game: 0,
+        name: 'Childish Gambino'
+    };
+    games[0].players.push(playerone);
+    playertwo = {
+        id: 2,
+        game: 0,
+        name: 'Lil Yachty'
+    };
+    games[0].players.push(playertwo);
+    playerthree = {
+        id: 3,
+        game: 0,
+        name: 'Paper Boi'
+    };
+    games[0].players.push(playerthree);
+    if (game.players.length >= 4) {
+        startGame(gameID);
+    }
 
-  var gameEvent = new Event(gameID, 'PlayerJoined');
-  gameEvent.player = player;
+    var gameEvent = new Event(gameID, 'PlayerJoined');
+    gameEvent.player = player;
 
-  io.emit('Player Joined', gameEvent);
+    io.emit('Player Joined', gameEvent);
 
-	return true;
+    return true;
 }
 
 function removePlayer(gameId, player) {
-  var game = games[gameId];
-  var index = game.players.indexOf(player); //may not work because of object reference. But I think it should. not tested
-  game.players.splice(index, 1);
+    var game = games[gameId];
+    var index = game.players.indexOf(player); //may not work because of object reference. But I think it should. not tested
+    game.players.splice(index, 1);
 
 
-  if (game.players.length < 1) {  //or when equal to one could declare winner.
-    endGame(gameID);
-  }
+    if (game.players.length < 1) { //or when equal to one could declare winner.
+        endGame(gameID);
+    }
 
-  var gameEvent = new Event(gameid, 'PlayerLeft');
-  gameEvent.player = player;
+    var gameEvent = new Event(gameid, 'PlayerLeft');
+    gameEvent.player = player;
 
-  return true;
+    return true;
 }
 
 function startTurn(gameId, player) {
-  //set player
+    //set player
 
 }
 
 function draft(gameId, player, territory, amount) {
-  var game = games[gameId];
-  var player = game.players[player];
+    var game = games[gameId];
+    var player = game.players[player];
 
-  //Should we add check?
-  if(!game.territories.isOwned()) return false;
+    //Should we add check?
+    if (!game.territories.isOwned()) return false;
 
-  game.territories.addTroops(territory, amount);
+    game.territories.addTroops(territory, amount);
 
-  var gameEvent = new Event(gameId, 'DraftMove');
-  gameEvent.player = player;
-  gameEvent.territory = territory;
-  gameEvent.amount = amount;
+    var gameEvent = new Event(gameId, 'DraftMove');
+    gameEvent.player = player;
+    gameEvent.territory = territory;
+    gameEvent.amount = amount;
 
-  io.emit('Draft Move', gameEvent);
+    io.emit('Draft Move', gameEvent);
 
-  return true;
+    return true;
 }
 
 function endTurn(gameID, player) {
-  var game = games[gameID];
-  var playerIndex = game.players.indexOf(player);
+    var game = games[gameID];
+    var playerIndex = game.players.indexOf(player);
 
-  if(++playerIndex > 3)
-    playerIndex = 0;
+    if (++playerIndex > 3)
+        playerIndex = 0;
 
-  game.currentPlayer = game.players[playerIndex].id;
+    game.currentPlayer = game.players[playerIndex].id;
 
-  var gameEvent = new Event(gameID, 'DraftMove');
-  gameEvent.player = player;
-  gameEvent.territory = territory;
-  gameEvent.amount = amount;
+    var gameEvent = new Event(gameID, 'DraftMove');
+    gameEvent.player = player;
+    gameEvent.territory = territory;
+    gameEvent.amount = amount;
 
-  io.emit('Draft Move', gameEvent);
+    io.emit('Draft Move', gameEvent);
 
-  return true;
+    return true;
 
 }
 
 //Assumes player has no remaining territories
 function playerElimination(gameID, player) {
-  return removePlayer(gameid,player);
+    return removePlayer(gameid, player);
 }
 
 function playerVictory(gameID, player) {
-  //Do something with player
-  return endGame(gameId);
+    //Do something with player
+    return endGame(gameId);
 }
 
 function endGame(gameId) {
-  delete games[gameId];
-  return true;
+    delete games[gameId];
+    return true;
 }
 
 
 function initTerritories(game) {
-//var game = games[gameId];
-  var playerIndex = 0;
-  var territoryIndex = 1;
-  var totalTerritories = game.territories.territories.length;
-  var totalTroops = 120;
+    //var game = games[gameId];
+    var playerIndex = 0;
+    var territoryIndex = 1;
+    var totalTerritories = game.territories.territories.length;
+    var totalTroops = 120;
 
-  for (i = 0; i < totalTroops; i++) {
-    game.territories.setPlayer(playerIndex, territoryIndex);
-    game.territories.addTroops(territoryIndex, 1);
+    for (i = 0; i < totalTroops; i++) {
+        game.territories.setPlayer(game.players[playerIndex].id, territoryIndex);
+        game.territories.addTroops(territoryIndex, 1);
 
-    playerIndex++;
-    territoryIndex++;
+        playerIndex++;
+        territoryIndex++;
 
-    if (playerIndex > 3) playerIndex = 0;
-    if (territoryIndex > totalTerritories)
-      territoryIndex = 1;
-  }
+        if (playerIndex > 3) playerIndex = 0;
+        if (territoryIndex > totalTerritories)
+            territoryIndex = 1;
+    }
 }
 
-function attack(gameId, attackingTerritory, defendingTerrritory, attackingTroops, defendingTroops){
-  //Assumes that territories are adjecent and not owned by same player
-  var game = games[gameId];
+function attack(gameId, attackingTerritory, defendingTerrritory, attackingTroops, defendingTroops) {
+    //Assumes that territories are adjecent and not owned by same player
+    var game = games[gameId];
 
-  var result = simulate(attackingTroops, defendingTroops);
-  //results = array containing num of remaining troops in territories
+    var result = simulate(attackingTroops, defendingTroops);
+    //results = array containing num of remaining troops in territories
 
-  game.addTroops(attackingTerritory, attackingTroops - result[0]); //attackingTroops in result[0]
-  game.addTroops(defendingTerrritory, defendingTroops - result[1]); //defendingTroops in result[1]
+    game.addTroops(attackingTerritory, attackingTroops - result[0]); //attackingTroops in result[0]
+    game.addTroops(defendingTerrritory, defendingTroops - result[1]); //defendingTroops in result[1]
 
-  //Check for territories
+    //Check for territories
 
-  return true;
+    return true;
 
 }
 
 function simulate(attackingTroops, defendingTroops) {
 
-  //Attacking Troops = 2
-  if (attackingTroops == 2) {
+    //Attacking Troops = 2
+    if (attackingTroops == 2) {
 
-    //Defending Troops = 1
-    if (defendingTroops < 2)
-      return attacking1v1(attackingTroops, defendingTroops);
+        //Defending Troops = 1
+        if (defendingTroops < 2)
+            return attacking1v1(attackingTroops, defendingTroops);
 
-    //Defending Troops > 1
-    else
-      return attacking1v2(attackingTroops, defendingTroops);
-  }
+        //Defending Troops > 1
+        else
+            return attacking1v2(attackingTroops, defendingTroops);
+    }
 
-  //Attacking Troop = 3
-  else if (attackingTroops == 3) {
+    //Attacking Troop = 3
+    else if (attackingTroops == 3) {
 
-    //Defending Troops = 1
-    if (defendingTroops < 2)
-      return attacking2v1(attackingTroops, defendingTroops);
+        //Defending Troops = 1
+        if (defendingTroops < 2)
+            return attacking2v1(attackingTroops, defendingTroops);
 
-    //Defending Troops > 1
-    else
-      return attacking2v2(attackingTroops, defendingTroops);
-  }
+        //Defending Troops > 1
+        else
+            return attacking2v2(attackingTroops, defendingTroops);
+    }
 
-  //Attacking Troop > 3
-  else {
+    //Attacking Troop > 3
+    else {
 
-    //Defending Troops = 1
-    if (defendingTroops < 2)
-      return attacking3v1(attackingTroops, defendingTroops);
+        //Defending Troops = 1
+        if (defendingTroops < 2)
+            return attacking3v1(attackingTroops, defendingTroops);
 
-    //Defending Troops > 1
-    else
-      return attacking3v2(attackingTroops, defendingTroops);
-  }
+        //Defending Troops > 1
+        else
+            return attacking3v2(attackingTroops, defendingTroops);
+    }
 }
 
 function attacking1v1(attackingTroops, defendingTroops) {
-  var result = [attackingTroops, defendingTroops];
+    var result = [attackingTroops, defendingTroops];
 
-  var attack = diceRoll();
-  var defense = diceRoll();
+    var attack = diceRoll();
+    var defense = diceRoll();
 
-  //Push Rolls to Socket
+    //Push Rolls to Socket
 
-  //console.log('Attacking Die: '+attack.toString());
-  //console.log('Defending Die: '+defense.toString());
+    //console.log('Attacking Die: '+attack.toString());
+    //console.log('Defending Die: '+defense.toString());
 
-  if (attack > defense) --result[1];  //Attacker wins
+    if (attack > defense) --result[1]; //Attacker wins
 
-  else --result[0];  //Defender wins
+    else --result[0]; //Defender wins
 
-  return result;
+    return result;
 }
 
 function attacking1v2(attackingTroops, defendingTroops) {
-  var result = [attackingTroops, defendingTroops];
+    var result = [attackingTroops, defendingTroops];
 
-  var attack = diceRoll();
-  var defense = [diceRoll(), diceRoll()];
+    var attack = diceRoll();
+    var defense = [diceRoll(), diceRoll()];
 
-  defense.sort(function(a, b){return b - a});
+    defense.sort(function(a, b) {
+        return b - a
+    });
 
-  //Push Rolls to Socket
+    //Push Rolls to Socket
 
-  //console.log('Attacking Die: '+attack.toString());
-  //console.log('Defending Dice: '+defense.toString());
+    //console.log('Attacking Die: '+attack.toString());
+    //console.log('Defending Dice: '+defense.toString());
 
-  if (attack > defense[0]) --result[1];
-
-  else --result[0];
-
-  return result;
-}
-
-function attacking2v1(attackingTroops,defendingTroops) {
-  var result = [attackingTroops, defendingTroops];
-
-  var attack = [diceRoll(), diceRoll()];
-  var defense = diceRoll();
-
-  attack.sort(function(a, b){return b - a});
-
-  //Push Rolls to Socket
-
-  //console.log('Attacking Dice: '+attack.toString());
-  //console.log('Defending Die: '+defense.toString());
-
-  if (attack[0] > defense) --result[1];
-
-  else --result[0];
-
-  return result;
-}
-
-function attacking2v2(attackingTroops,defendingTroops) {
-  var result = [attackingTroops, defendingTroops];
-
-  var attack = [diceRoll(), diceRoll()];
-  var defense = [diceRoll(), diceRoll()];
-
-  attack.sort(function(a, b){return b - a});
-  defense.sort(function(a, b){return b - a});
-
-  //Push Rolls to Socket
-
-  //console.log('Attacking Dice: '+attack.toString());
-  //console.log('Defending Dice: '+defense.toString());
-
-  //Compares highest die
-  if (attack[0] > defense[0]) {
-
-    --result[1];  //Highest attacker wins
-
-    //Compares second highest die
-    if (attack[1] > defense[1]) {
-      --result[1];  //Second highest attacker wins
-    } else {
-      --result[0];  //Second highest defender wins
-    }
-
-    return result;
-
-  } else {
-    --result[0]; //Highest defender wins
-
-    //Compares second highest die
-    if (attack[1] > defense[1]) --result[1];
+    if (attack > defense[0]) --result[1];
 
     else --result[0];
 
     return result;
-  }
 }
 
-function attacking3v1(attackingTroops,defendingTroops) {
-  var result = [attackingTroops, defendingTroops];
+function attacking2v1(attackingTroops, defendingTroops) {
+    var result = [attackingTroops, defendingTroops];
 
-  var attack = [diceRoll(), diceRoll(), diceRoll()];
-  var defense = diceRoll();
+    var attack = [diceRoll(), diceRoll()];
+    var defense = diceRoll();
 
-  attack.sort(function(a, b){return b - a});
+    attack.sort(function(a, b) {
+        return b - a
+    });
 
-  //Push Rolls to Socket
+    //Push Rolls to Socket
 
-  //console.log('Attacking Dice: '+attack.toString());
-  //console.log('Defending Die: '+defense.toString());
+    //console.log('Attacking Dice: '+attack.toString());
+    //console.log('Defending Die: '+defense.toString());
 
-  if (attack[0] > defense) --result[1];
+    if (attack[0] > defense) --result[1];
 
-  else --result[0];
+    else --result[0];
 
-  return result;
+    return result;
 }
 
-function attacking3v2(attackingTroops,defendingTroops) {
-  var result = [attackingTroops, defendingTroops];
+function attacking2v2(attackingTroops, defendingTroops) {
+    var result = [attackingTroops, defendingTroops];
 
-  var attack = [diceRoll(), diceRoll(), diceRoll()];
-  var defense = [diceRoll(), diceRoll()];
+    var attack = [diceRoll(), diceRoll()];
+    var defense = [diceRoll(), diceRoll()];
 
-  attack.sort(function(a, b){return b - a});
-  defense.sort(function(a, b){return b - a});
+    attack.sort(function(a, b) {
+        return b - a
+    });
+    defense.sort(function(a, b) {
+        return b - a
+    });
 
-  //Push Rolls to Socket
+    //Push Rolls to Socket
 
-  //console.log('Attacking Dice: '+attack.toString());
-  //console.log('Defending Dice: '+defense.toString());
+    //console.log('Attacking Dice: '+attack.toString());
+    //console.log('Defending Dice: '+defense.toString());
 
-  //Compares highest die
-  if (attack[0] > defense[0]) {
-    --result[1];
+    //Compares highest die
+    if (attack[0] > defense[0]) {
 
-    //Compares second highest die
-    if (attack[1] > defense[1]) {
-      --result[1];
+        --result[1]; //Highest attacker wins
+
+        //Compares second highest die
+        if (attack[1] > defense[1]) {
+            --result[1]; //Second highest attacker wins
+        } else {
+            --result[0]; //Second highest defender wins
+        }
+
+        return result;
+
     } else {
-      --result[0];
+        --result[0]; //Highest defender wins
+
+        //Compares second highest die
+        if (attack[1] > defense[1]) --result[1];
+
+        else --result[0];
+
+        return result;
+    }
+}
+
+function attacking3v1(attackingTroops, defendingTroops) {
+    var result = [attackingTroops, defendingTroops];
+
+    var attack = [diceRoll(), diceRoll(), diceRoll()];
+    var defense = diceRoll();
+
+    attack.sort(function(a, b) {
+        return b - a
+    });
+
+    //Push Rolls to Socket
+
+    //console.log('Attacking Dice: '+attack.toString());
+    //console.log('Defending Die: '+defense.toString());
+
+    if (attack[0] > defense) --result[1];
+
+    else --result[0];
+
+    return result;
+}
+
+function attacking3v2(attackingTroops, defendingTroops) {
+    var result = [attackingTroops, defendingTroops];
+
+    var attack = [diceRoll(), diceRoll(), diceRoll()];
+    var defense = [diceRoll(), diceRoll()];
+
+    attack.sort(function(a, b) {
+        return b - a
+    });
+    defense.sort(function(a, b) {
+        return b - a
+    });
+
+    //Push Rolls to Socket
+
+    //console.log('Attacking Dice: '+attack.toString());
+    //console.log('Defending Dice: '+defense.toString());
+
+    //Compares highest die
+    if (attack[0] > defense[0]) {
+        --result[1];
+
+        //Compares second highest die
+        if (attack[1] > defense[1]) {
+            --result[1];
+        } else {
+            --result[0];
+        }
+
+        //return result;
+
+    } else {
+        --result[0];
+
+        //Compares second highest die
+        if (attack[1] > defense[1]) {
+            --result[1];
+        } else {
+            --result[0];
+        }
     }
 
-    //return result;
-
-  } else {
-    --result[0];
-
-    //Compares second highest die
-    if (attack[1] > defense[1]) {
-      --result[1];
-    } else {
-      --result[0];
-    }
-  }
-
-  return result;
+    return result;
 }
 
 
 function diceRoll() {
-  return Math.floor(Math.random() * 6) + 1;
+    return Math.floor(Math.random() * 6) + 1;
 }
 
 
 /* This file will contain all of the backend game logic */
 router.get('/', function(req, res, next) {
-  res.render('index');
+    res.render('index');
 });
 
 
 router.get('/:id/territories', function(req, res, next) {
-  var game = games[req.params.id];
+    var game = games[req.params.id];
     if (game != null) {
-      res.send(game.territories);
+        res.send(game.territories);
     } else {
-      res.send(false);
+        res.send(false);
     }
 });
 
@@ -421,71 +436,73 @@ router.get('/:id/state', function(req, res, next) {
     console.log(req.params);
     console.log(games);
     if (game != null) {
-      res.send(game);
+        res.send(game);
     } else {
-      res.send(false);
+        res.send(false);
     }
 });
 
 router.get('/:id', function(req, res, next) {
-  game = games[req.params.id];
-  res.render('game', { gameid: req.params.id });
-  //Eventually the code will work like this
-  /*
-  game = games[req.params.id];
-  if (game != null) {
-    res.render('game', { gameState: game });
-  } else {
-    res.render('index', { title: 'Create a game!' });
-  }
-  */
+    game = games[req.params.id];
+    res.render('game', {
+        gameid: req.params.id
+    });
+    //Eventually the code will work like this
+    /*
+    game = games[req.params.id];
+    if (game != null) {
+      res.render('game', { gameState: game });
+    } else {
+      res.render('index', { title: 'Create a game!' });
+    }
+    */
 });
 
 router.post('/events', function(req, res, next) {
-  console.log(req.body);
-	switch (req.body.type){
-    case "CreateGame":
-      res.send(createGame());
-      break;
-    case "PlayerJoined":
-      res.send(addPlayer(req.body.gameid, req.body.player));
-      break;
-    case "PlayerLeft":
-      res.send(removePlayer(req.body.event.gameid, req.body.event.player));
-      break;
-    case "TurnStart":
-      res.send(startTurn(req.body.event.gameid, req.body.event.player));
-      break;
-    case "DraftMove":
-      res.send(draft(req.body.event.gameid, req.body.event.player, req.body.event.territory, req.body.event.amount));
-      break;
-    case "Attack":
-      res.send(attack(req.body.event.gameid, req.body.event.territory, req.body.event.territory, req.body.event.amount, req.body.event.amount));
-      break;
-    case "BattleResult":
-      //not implemented
-      //res.send();
-      break;
-    case "BattleVictory":
-      //not implemented
-      //res.send();
-      break;
-    case "Fortify":
-      //not implemented
-      //res.send();
-      break;
-    case "TurnEnd":
-      res.send(endTurn(res.body.event.gameid, res.body.event.player));
-      break;
-    case "PlayerEliminated":
-      res.send(playerElimination(res.body.event.gameid, res.body.event.player));
-      break;
-    case "PlayerWon":
-      res.send(playerVictory(res.body.event.gameid, res.body.event.player));
-      break;
-	   default:
-	       console.log("this shouldn't happen");
-	}
+    console.log(req.body);
+    switch (req.body.type) {
+        case "CreateGame":
+            res.send(createGame());
+            break;
+        case "PlayerJoined":
+            res.send(addPlayer(req.body.gameid, req.body.player));
+            break;
+        case "PlayerLeft":
+            res.send(removePlayer(req.body.event.gameid, req.body.event.player));
+            break;
+        case "TurnStart":
+            res.send(startTurn(req.body.event.gameid, req.body.event.player));
+            break;
+        case "DraftMove":
+            res.send(draft(req.body.event.gameid, req.body.event.player, req.body.event.territory, req.body.event.amount));
+            break;
+        case "Attack":
+            res.send(attack(req.body.event.gameid, req.body.event.territory, req.body.event.territory, req.body.event.amount, req.body.event.amount));
+            break;
+        case "BattleResult":
+            //not implemented
+            //res.send();
+            break;
+        case "BattleVictory":
+            //not implemented
+            //res.send();
+            break;
+        case "Fortify":
+            //not implemented
+            //res.send();
+            break;
+        case "TurnEnd":
+            res.send(endTurn(res.body.event.gameid, res.body.event.player));
+            break;
+        case "PlayerEliminated":
+            res.send(playerElimination(res.body.event.gameid, res.body.event.player));
+            break;
+        case "PlayerWon":
+            res.send(playerVictory(res.body.event.gameid, res.body.event.player));
+            break;
+        default:
+            console.log("this shouldn't happen");
+    }
 });
 
 module.exports = router;
