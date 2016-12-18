@@ -1,9 +1,10 @@
 var socket = io();
-/*game.players = {};
+var game = {};
+game.players = {};
 game.players[0] = "red";
 game.players[1] = "blue";
 game.players[2] = "yellow";
-game.players[3] = "green";*/
+game.players[3] = "green";
 socket.on('chat message', function(msg) {
     $('#messages').append($('<li>').text(msg));
 });
@@ -76,17 +77,54 @@ function configureGame(gameState) {
 		addPlayer(gameState.players[i].id, gameState.players[i].name);
 	}
 	if (gameState.currentPhase = 'setup') {
-		$("#setupText").removeClass('hidden');
+		$("#setupText").show();
 	} 
 }
 
 function addPlayer(playerID, playerName){
-	document.getElementById('players').innerHTML += '<li class="list-group-item" id="'+ playerID +'">'+ playerName + '</li>';
+	document.getElementById('players').innerHTML += '<li class="list-group-item" id="player_'+ playerID +'">'+ playerName + '</li>';
 }
 
 function removePlayer(playerID, playerName){
-	$('#' + playerID).remove();
+	$('#player_' + playerID).remove();
 }
+
+function updateMap() {
+	$.get(
+	    "/game/"+game.id+"/territories",
+	    function(data) {
+	    	console.log(data);
+	    	for (i = 0; i < data.territories.length; i++) {
+	    		setTroops(data.territories[i].id, data.territories[i].troops)
+	    		setColor(data.territories[i].id, data.territories[i].player);
+			}
+	       game.territories = data.territories;
+	    }
+	);
+}
+
+function setPlayerActive(playerID){
+	$('.active').each(function(i, obj) {
+	    $(this).removeClass("active");
+	});
+	$('#player_'+playerID).addClass('active');
+}
+
+function startDraft(playerID){
+	$("#draftText").show();
+	//enable tab, show text, calculate draft amount, do draft, end turn, go to attack
+}
+
+socket.on('Game Starting', function(event) {
+    updateMap();
+    setPlayerActive(event.currentPlayer);
+    $("#setupText").hide();
+    if (localStorage.getItem("userID") == event.currentPlayer){
+    	startDraft(event.currentPlayer);
+    } else {
+    	$("#waitingText").show();
+    }
+});
 
 
 jQuery(document).ready(function() {
@@ -115,19 +153,6 @@ jQuery(document).ready(function() {
         }
     );
     
-    /* This is test code to populate the game with fake data
-    $.get(
-	    "/game/"+game.id+"/territories",
-	    function(data) {
-	    	console.log(data);
-	    	for (i = 0; i < data.territories.territories.length; i++) {
-	    		setTroops(data.territories.territories[i].id, data.territories.territories[i].troops)
-	    		setColor(data.territories.territories[i].id, data.territories.territories[i].player);
-			}
-	       game.territories = data.territories.territories;
-	    }
-	);*/
-	
 	// This button will increment the value
     $('.qtyplus').click(function(e) {
         // Stop acting like a button
@@ -167,5 +192,11 @@ jQuery(document).ready(function() {
         $('#text').val('');
         return false;
     };
+
+    $('#setupText').hide().removeClass('hidden');
+    $('#draftText').hide().removeClass('hidden');
+    $('#attackText').hide().removeClass('hidden');
+    $('#fortifyText').hide().removeClass('hidden');
+    $('#waitingText').hide().removeClass('hidden');
 
 });

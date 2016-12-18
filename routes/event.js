@@ -1,5 +1,4 @@
-function Event(gameid, type, player){
+module.exports = function Event(gameid, type){
   this.game = gameid;
   this.eventType = type;
-  this.player = player;
 }

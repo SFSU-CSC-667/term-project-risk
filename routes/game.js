@@ -1,6 +1,7 @@
 var express = require('express');
 var world = require("./map.js");
 var io = require('../app');
+var Event = require('./event.js');
 var router = express.Router();
 var maxGameID = 0;
 var games = [];
@@ -54,25 +55,32 @@ function createGame() {
   game.currentPlayer = 0;
   game.currentPhase = "setup";
   games[maxGameID] = game;
-  maxGameID++
+  maxGameID++;
   return game;
 }
 
-function startGame(gameId) {
-  var game = games[gameId];
+function startGame(gameID) {
+  var game = games[gameID];
   initTerritories(game);
-
-  
+  console.log(gameID);
+  var gameEvent = new Event(gameID, 'StartGame');
+  io.emit("Game Starting", gameEvent);
   //return player to start turn or do that here
 }
 
-function addPlayer(gameId, player) {
-	var game = games[gameId];
+function addPlayer(gameID, player) {
+	var game = games[gameID];
 	//TODO: Need some validation on the player object
 	game.players.push(player);
 	if (game.players.length >= 4) {
 		startGame(gameID);
-	} 
+	}
+
+  var gameEvent = new Event(gameID, 'PlayerJoined');
+  gameEvent.player = player;
+
+  io.emit('Player Joined', gameEvent);
+
 	return true;
 }
 
@@ -85,6 +93,10 @@ function removePlayer(gameId, player) {
   if (game.players.length < 1) {  //or when equal to one could declare winner.
     endGame(gameID);
   }
+
+  var gameEvent = new Event(gameid, 'PlayerLeft');
+  gameEvent.player = player;
+
   return true; 
 }
 
@@ -102,17 +114,31 @@ function draft(gameId, player, territory, amount) {
 
   game.territories.addTroops(territory, amount);
 
+  var gameEvent = new Event(gameId, 'DraftMove');
+  gameEvent.player = player;
+  gameEvent.territory = territory;
+  gameEvent.amount = amount;
+
+  io.emit('Draft Move', gameEvent);
+
   return true;
 }
 
 function endTurn(gameID, player) {
-  var game = games[gameId];
+  var game = games[gameID];
   var playerIndex = game.players.indexOf(player);
   
   if(++playerIndex > 3)
     playerIndex = 0;
 
   game.currentPlayer = game.players[playerIndex].id;
+
+  var gameEvent = new Event(gameID, 'DraftMove');
+  gameEvent.player = player;
+  gameEvent.territory = territory;
+  gameEvent.amount = amount;
+
+  io.emit('Draft Move', gameEvent);
 
   return true;
   
@@ -135,16 +161,15 @@ function endGame(gameId) {
 
 
 function initTerritories(game) {
-  //var game = games[gameId];
-
+//var game = games[gameId];
   var playerIndex = 0;
   var territoryIndex = 1;
-  var totalTerritories = game.territories.length;
+  var totalTerritories = game.territories.territories.length;
   var totalTroops = 120;
 
   for (i = 0; i < totalTroops; i++) {
     game.territories.setPlayer(playerIndex, territoryIndex);
-    addTroops(territoryIndex, 1);
+    game.territories.addTroops(territoryIndex, 1);
     
     playerIndex++;
     territoryIndex++;
@@ -382,13 +407,16 @@ router.get('/', function(req, res, next) {
 
   
 router.get('/:id/territories', function(req, res, next) {
-  var currentGame = createGame();
-  setTerritories(currentGame);
-  res.send(currentGame);
+  var game = games[req.params.id];
+    if (game != null) {
+      res.send(game.territories);
+    } else {
+      res.send(false);
+    }
 });
 
 router.get('/:id/state', function(req, res, next) {
-    game = games[req.params.id];
+    var game = games[req.params.id];
     console.log(req.params);
     console.log(games);
     if (game != null) {
@@ -422,16 +450,16 @@ router.post('/events', function(req, res, next) {
       res.send(addPlayer(req.body.gameid, req.body.player));
       break;
     case "PlayerLeft":
-      res.send(removePlayer(res.body.event.gameid, res.body.event.player));
+      res.send(removePlayer(req.body.event.gameid, req.body.event.player));
       break;
     case "TurnStart":
-      res.send(startTurn(res.body.event.gameid, res.body.event.player));
+      res.send(startTurn(req.body.event.gameid, req.body.event.player));
       break;
     case "DraftMove":
-      res.send(draft(res.body.event.gameid, res.body.event.player, res.body.event.territory, res.body.event.amount));
+      res.send(draft(req.body.event.gameid, req.body.event.player, req.body.event.territory, req.body.event.amount));
       break;
     case "Attack":
-      res.send(attack(res.body.event.gameid, res.body.event.territory, res.body.event.territory, res.body.event.amount, res.body.event.amount));
+      res.send(attack(req.body.event.gameid, req.body.event.territory, req.body.event.territory, req.body.event.amount, req.body.event.amount));
       break;
     case "BattleResult":
       //not implemented
