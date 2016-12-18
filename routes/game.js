@@ -44,13 +44,13 @@ function createGame() {
 function startGame(gameID) {
     var game = games[gameID];
     initTerritories(game);
-    //console.log(gameID);
-    var gameEvent = new Event(gameID, 'StartGame');
-    io.emit("Game Starting", gameEvent);
-    startTurn(gameID);
-
     game.currentPhase = "draft";
     game.currentPlayer = game.players[0].id;
+
+    var gameEvent = new Event(gameID, 'StartGame');
+    gameEvent.currentPlayer = game.currentPlayer;
+    io.emit("Game Starting", gameEvent);
+
     //return player to start turn or do that here
 }
 
@@ -108,10 +108,6 @@ function removePlayer(gameID, player) {
 
 
 function startTurn(gameID) {
-  var gameEvent = new Event(gameID, 'startTurn');
-  gameEvent.player = player;
-
-  io.emit('Start Game', gameEvent);
 
 }
 

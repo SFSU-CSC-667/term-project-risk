@@ -123,7 +123,7 @@ function initGame(gameState) {
     game.id = gameState.id;
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
-    } else if (gameState.currentPlayers == Number(localStorage.getItem("userID"))) {
+    } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
         if (gameState.currentPhase == 'draft') {
             initDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
@@ -200,8 +200,9 @@ socket.on('Game Starting', function(event) {
     }
 }).on('Attack Phase Start', function(event) {
 	console.log(event);
-    if (localStorage.getItem("userID") == (event.currentPlayer + "")) {
-        startAttack(event.currentPlayer, event.game);
+	console.log(localStorage.getItem("userID"));
+    if (event.player == localStorage.getItem("userID")) {
+        startAttack(event.player, event.game);
     } else {
         $("#waitingText").show();
     }
