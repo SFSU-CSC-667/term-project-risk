@@ -72,7 +72,7 @@
               <!-- TODO Hook these up to the server via handlebars/socket -->
               <div id="setupText" class="hidden"> Currently waiting for other players to join the game. The game will begin automatically when there are four players. </div>
               <div id="draftText" class="hidden"> You may draft <span id="draft-amount"></span> units this turn. Please click on the map to place them. 
-                <br> <button type="button" class="btn btn-danger">End Phase</button></div>
+                <br> <button type="button" class="btn btn-danger" onclick="endPhase();">End Phase</button></div>
               <div id="attackText" class="hidden"> You may now attack! Please click on the territory you want to attack from, then an adjacent territory you are attacking. <br> <button type="button" class="btn btn-danger">End Phase</button></div>
               <div id="fortifyText" class="hidden"> You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into. <br> <button type="button" class="btn btn-danger">End Turn</button></div>
               <div id="waitingText" class="hidden"> It is not your turn yet. </div>
@@ -231,13 +231,11 @@
         </div>
         <div class="col-md-3">
           <div class="col-md-12 panel panel-default">
-            <div class="panel-body">
-              <div id="chatFrame" >
+            <div id="chatFrame" >
               	<ul id="messages"></ul>
               	<form id="messageForm" action="">
               		<input id="text" sautocomplete="off" placeholder="Message..."/><button id="sendButton">Send</button>
               	</form>
-              </div>
             </div>
           </div>
         </div>

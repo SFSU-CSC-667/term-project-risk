@@ -21,9 +21,9 @@ var games = [];
 
 // Socket stuff
 io.on('connection', function(socket) {
-    io.emit('chat message', 'Welcome to the game!');
+  io.to(socket.id).emit('welcome', 'Welcome to the game!');
     socket.on('chat message', function(msg) {
-        io.emit('chat message', msg);
+      io.emit('chat message', msg);
     });
 });
 
@@ -44,11 +44,13 @@ function createGame() {
 function startGame(gameID) {
     var game = games[gameID];
     initTerritories(game);
-    console.log(gameID);
-    var gameEvent = new Event(gameID, 'StartGame');
-    io.emit("Game Starting", gameEvent);
     game.currentPhase = "draft";
     game.currentPlayer = game.players[0].id;
+
+    var gameEvent = new Event(gameID, 'StartGame');
+    gameEvent.currentPlayer = game.currentPlayer;
+    io.emit("Game Starting", gameEvent);
+
     //return player to start turn or do that here
 }
 
@@ -105,8 +107,7 @@ function removePlayer(gameID, player) {
 }
 
 
-function startTurn(gameID, player) {
-    //set player
+function startTurn(gameID) {
 
 }
 
@@ -154,14 +155,16 @@ function playerVictory(gameID, player) {
     return endGame(gameID);
 }
 
-function endPhase(gameID, player) {
+function endPhase(gameID) {
+  var game = games[gameID];
   switch(game.currentPhase) {
     case "draft":
       game.currentPhase = "attack";
 
       var gameEvent = new Event(gameID, 'End Phase');
-      gameEvent.player = player;
-      io.emit(player.name + ' Draft Phase Ended. Starting Attack Phase', gameEvent);
+      gameEvent.player = game.currentPlayer;
+      io.emit('chat message', game.currentPlayer + ' Draft Phase Ended. Starting Attack Phase');
+      io.emit('Attack Phase Start', gameEvent);
 
       break;
 
@@ -169,24 +172,18 @@ function endPhase(gameID, player) {
       game.currentPhase = "fortify";
 
       var gameEvent = new Event(gameID, 'End Phase');
-      gameEvent.player = player;
-      io.emit(player.name + 'Attack Phase Ended. Starting Fortify Phase', gameEvent);
+      gameEvent.player = game.currentPlayer;
+      io.emit('chat message', game.currentPlayer + 'Attack Phase Ended. Starting Fortify Phase');
+      io.emit('Fortify Phase Start', gameEvent);
 
       break;
 
     case "fortify":
-      endTurn(game, player);
+      endTurn(game, game.currentPlayer);
       break;
     default:
       console.log("Something went wrong.");
   }
-
-  var gameEvent = new Event(gameID, 'EndTurn');
-  gameEvent.player = player;
-  io.emit('Draft Move', gameEvent);
-  game.currentPhase = "draft";
-
-
 }
 
 function endGame(gameID) {
@@ -542,14 +539,17 @@ router.post('/events', function(req, res, next) {
             //not implemented
             //res.send();
             break;
+        case "PhaseEnd":
+            res.send(endPhase(req.body.gameid));
+            break;
         case "TurnEnd":
-            res.send(endTurn(res.body.event.gameid, res.body.event.player));
+            res.send(endTurn(req.body.event.gameid, req.body.event.player));
             break;
         case "PlayerEliminated":
-            res.send(playerElimination(res.body.event.gameid, res.body.event.player));
+            res.send(playerElimination(req.body.event.gameid, req.body.event.player));
             break;
         case "PlayerWon":
-            res.send(playerVictory(res.body.event.gameid, res.body.event.player));
+            res.send(playerVictory(req.body.event.gameid, req.body.event.player));
             break;
         default:
             console.log("this shouldn't happen");

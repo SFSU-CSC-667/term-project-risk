@@ -9,7 +9,10 @@ colors[3] = "green";
 var currentPlayers = 0;
 var clickCount = 0;
 var reinforceTroops, sourceTerritory, sourceID, destID, upLimit;
-socket.on('chat message', function(msg) {
+socket.on('welcome', function(msg){
+    $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
+});
+socket.on('chat message', function(msg){
     $('#messages').append($('<li>').text(msg));
 });
 
@@ -163,15 +166,14 @@ function initGame(gameState) {
     setPlayerActive(gameState.currentPlayer);
     game.currentPlayer = gameState.currentPlayer;
     game.currentPhase = gameState.currentPhase;
+    game.id = gameState.id;
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
     } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
         if (gameState.currentPhase == 'draft') {
             initDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
-            //Do attack
-            $('#draftText').hide();
-            $('#attackText').show();
+            startAttack(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'fortify') {
             //Do fortify
             $('#attackText').hide();
@@ -180,6 +182,16 @@ function initGame(gameState) {
     } else {
         $('#waitingText').show();
     }
+}
+
+function endPhase() {
+	var body = {};
+	body.gameid = game.id;
+	body.type = "PhaseEnd";
+	$.post(
+        "/game/events",
+        body
+    );
 }
 
 function addPlayer(playerID, playerName) {
@@ -208,19 +220,35 @@ function updateMap() {
     );
 }
 
-function setPlayerActive(playerID) {
+function setPlayerActive(playerID, gameID) {
     $('.active').each(function(i, obj) {
         $(this).removeClass("active");
     });
     $('#player_' + playerID).addClass('active');
 }
 
+function startAttack(playerID) {
+    $('#waitingText').hide();
+    $('#draftText').hide();
+    $('#draftpill').removeClass("active").addClass('disabled');
+    $('#attackpill').removeClass("disabled").addClass('active');
+    $('#attackText').show();
+}
+
 socket.on('Game Starting', function(event) {
     updateMap();
     setPlayerActive(event.currentPlayer);
     $("#setupText").hide();
-    if (localStorage.getItem("userID") == event.currentPlayer) {
+    if (Number(localStorage.getItem("userID")) == event.currentPlayer) {
         startDraft(event.currentPlayer);
+    } else {
+        $("#waitingText").show();
+    }
+}).on('Attack Phase Start', function(event) {
+	console.log(event);
+	console.log(localStorage.getItem("userID"));
+    if (event.player == localStorage.getItem("userID")) {
+        startAttack(event.player, event.game);
     } else {
         $("#waitingText").show();
     }
