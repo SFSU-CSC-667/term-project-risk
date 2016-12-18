@@ -7,44 +7,76 @@ colors[1] = "blue";
 colors[2] = "yellow";
 colors[3] = "green";
 var currentPlayers = 0;
+var clickCount = 0;
+var reinforceTroops, sourceTerritory, sourceID, destID, upLimit;
 socket.on('chat message', function(msg) {
     $('#messages').append($('<li>').text(msg));
 });
 
-function territoryClicked(name) {
+function territoryClicked(name, id) {
     console.log(name);
     if (game.currentPhase == "draft") {
-    	//Decrease draft-amount span accordingly when drafting
-    	//only let me deploy/draft on territories I control
-    	//only allow me to draft when I have draft-amount > 0
-    	 //while $('#draft-amount').text() > 0
-    	//Don't let me reduce my troop count more than prexisting
-    	//use game.territories to get information
-        deploy(name);
+    	//Decrease draft-amount span accordingly when drafting- done
+    	//only let me deploy/draft on territories I control - done
+    	//only allow me to draft when I have draft-amount > 0 - done
+    	 //while $('#draft-amount').text() > 0 - done
+    	//Don't let me reduce my troop count more than prexisting - ?
+    	if(game.territories[(id-1)].player == game.currentPlayer) {
+    		if(parseInt(document.getElementById('draft-amount').textContent) > 0) {
+        		deploy(name);
+        	}
+        	else {
+        	alert("No troops to deploy");			//user does not have troops to deploy
+        	}
+    	}
+    	else {
+    		alert("CLick on your own territory");	//click on your territory
+    	}
+
     } else if (game.currentPhase == "attack") {
         //attack model
-    } else if (game.currentPhase == "reinforce") {
-    	//Have them click again
-    	//Get their second click and call the next function on that second selection?
-		//Click a source territory and a target territory
-		//Enter an amount of troops to transfer to the new territory
-		//THERE MUST BE AT LEAST ONE TROOP REMAINING IN THE SOURCE TERRITORY
-        reinforce(name);
+    } else if (game.currentPhase == "fortify") {
+    	if(game.territories[(id-1)].player == game.currentPlayer) {
+	    	clickCount++;
+	    	//Have them click again - done
+	    	//Get their second click and call the next function on that second selection? - done
+			//Click a source territory and a target territory - done
+			//Enter an amount of troops to transfer to the new territory - done
+			//THERE MUST BE AT LEAST ONE TROOP REMAINING IN THE SOURCE TERRITORY - done
+			if(clickCount == 1) {
+				sourceTerritoryText = document.getElementById(name+"Text");
+				sourceID = id;
+				reinforceTroops = parseInt(document.getElementById(name+"Text").textContent) - 1;
+				console.log(sourceTerritoryText+" "+reinforceTroops);
+				//ask user to click again
+				document.getElementById('fortifyText').textContent = "Please select a neighbouring terrirtory to reinforce troops";
+			}
+			else if(clickCount == 2) {
+				clickCount = 0;
+				destID = id;
+				document.getElementById('fortifyText').textContent = "You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into.";
+	        	reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID);
+	        }
+	    }
+	    else {
+    		alert("CLick on your own territory");	//click on your territory
+    	}
     }
 }
 
 
 function deploy(name) {
     //Assigns the current value to the input, or zero if it isn't set
-    document.getElementById('deployValue').value = document.getElementById(name + "Text").textContent == "" ?
-        0 : document.getElementById(name + "Text").textContent;
+    document.getElementById('deployValue').value = upLimit = document.getElementById('draft-amount').textContent == "" ?
+        0 : document.getElementById('draft-amount').textContent;
     var modal = document.getElementById('deployModal');
     modal.style.display = "block";
     ///Hides when you click Deploy button
     document.getElementById('deploy').onclick = function() {
             document.getElementById('deployModal').style.display = "none";
             console.log("Deployed " + document.getElementById('deployValue').value + " in " + name);
-            document.getElementById(name + 'Text').textContent = document.getElementById('deployValue').value;
+            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('deployValue').value);
+            document.getElementById('draft-amount').textContent = parseInt(document.getElementById('draft-amount').textContent) - parseInt(document.getElementById('deployValue').value);
         }
         //Hides model when you click away or click the close button
     document.getElementsByClassName("close")[0].onclick = function() {
@@ -57,28 +89,36 @@ function deploy(name) {
     }
 }
 
-function reinforce(name) {
-    var troopsRemaining = 3;
-    //Assigns the current value to the input, or zero if it isn't set
-    document.getElementById('reinforceValue').value = troopsRemaining == 0 ?
-        0 : troopsRemaining;
-    var modal = document.getElementById('reinforceModal');
-    modal.style.display = "block";
-    ///Hides when you click Deploy button
-    document.getElementById('reinforce').onclick = function() {
-            document.getElementById('reinforceModal').style.display = "none";
-            console.log("Reinforced " + document.getElementById('reinforceValue').value + " in " + name);
-            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('reinforceValue').value);
-        }
-        //Hides model when you click away or click the close button
-    document.getElementsByClassName("close")[1].onclick = function() {
-        modal.style.display = "none";
-    }
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
+function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID) {
+	if(reinforceTroops <= 0) {
+		alert("No troops to reinforce")
+	}
+	else if(game.territories[sourceID-1].ajacent.indexOf(destID) >= 0) {
+		console.log(name+" "+sourceTerritoryText+" "+reinforceTroops);
+	    //Assigns the current value to the input, or zero if it isn't set
+	    document.getElementById('reinforceValue').value = upLimit = reinforceTroops;
+	    var modal = document.getElementById('reinforceModal');
+	    modal.style.display = "block";
+	    ///Hides when you click Deploy button
+	    document.getElementById('reinforce').onclick = function() {
+	            document.getElementById('reinforceModal').style.display = "none";
+	            console.log("Reinforced " + document.getElementById('reinforceValue').value + " in " + name);
+	            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('reinforceValue').value);
+	        	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('reinforceValue').value);
+	        }
+	        //Hides model when you click away or click the close button
+	    document.getElementsByClassName("close")[1].onclick = function() {
+	        modal.style.display = "none";
+	    }
+	    window.onclick = function(event) {
+	        if (event.target == modal) {
+	            modal.style.display = "none";
+	        }
+	    }
+	}
+	else {
+		alert("Please select an adjacent territory");
+	}
 }
 
 function setColor(territoryID, playerID) {
@@ -109,6 +149,7 @@ function initDraft(playerID, gameid) {
         body,
         draftText
     );
+
     //enable tab, show text, calculate draft amount, do draft, end phase, go to attack
 
 }
@@ -118,7 +159,9 @@ function initGame(gameState) {
         addPlayer(gameState.players[i].id, gameState.players[i].name);
     }
     drawMap(gameState.territories.territories);
+    game.territories = gameState.territories.territories;
     setPlayerActive(gameState.currentPlayer);
+    game.currentPlayer = gameState.currentPlayer;
     game.currentPhase = gameState.currentPhase;
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
@@ -189,7 +232,6 @@ jQuery(document).ready(function() {
     $(this).scrollTop(0);
     var height = (675 / $("#planetmap").height());
     var width = (1200 / $("#planetmap").width());
-    console.log($("#planetmap").height() + " " + $("#planetmap").offset().top + " " + $("#indonesiaText").offset().top);
     var size = parseInt($(".text").css('font-size'));
     var text_array = $('.text');
     for (var i = 0; i < text_array.length; i++) {
@@ -219,13 +261,19 @@ jQuery(document).ready(function() {
         // Get its current value
         currentVal = parseInt($('input[name=' + fieldName + ']').val());
         // If is not undefined
-        if (!isNaN(currentVal)) {
+        if(upLimit != undefined) {
+        	if(!isNaN(currentVal)&&currentVal < upLimit) {
             // Increment
             $('input[name=' + fieldName + ']').val(currentVal + 1);
-        } else {
-            // Otherwise put a 0 there
-            $('input[name=' + fieldName + ']').val(0);
+        	} 
         }
+        else {
+        	if(!isNaN(currentVal)) {
+            // Increment
+            $('input[name=' + fieldName + ']').val(currentVal + 1);
+        	} 
+        }
+        
     });
     // This button will decrement the value till 0
     $(".qtyminus").click(function(e) {
@@ -236,12 +284,9 @@ jQuery(document).ready(function() {
         // Get its current value
         currentVal = parseInt($('input[name=' + fieldName + ']').val());
         // If it isn't undefined or its greater than 0
-        if (!isNaN(currentVal) && currentVal > 0) {
+        if(!isNaN(currentVal) && currentVal > 0) {
             // Decrement one
             $('input[name=' + fieldName + ']').val(currentVal - 1);
-        } else {
-            // Otherwise put a 0 there
-            $('input[name=' + fieldName + ']').val(0);
         }
     });
     document.getElementById('sendButton').onclick = function() {
