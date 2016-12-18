@@ -47,7 +47,7 @@ function startGame(gameID) {
     //console.log(gameID);
     var gameEvent = new Event(gameID, 'StartGame');
     io.emit("Game Starting", gameEvent);
-    startTurn(game, player);
+    startTurn(gameID);
 
     game.currentPhase = "draft";
     game.currentPlayer = game.players[0].id;
@@ -111,7 +111,7 @@ function startTurn(gameID) {
   var gameEvent = new Event(gameID, 'startTurn');
   gameEvent.player = player;
 
-  io.emit('Player Joined', gameEvent);
+  io.emit('Start Game', gameEvent);
 
 }
 
@@ -167,7 +167,7 @@ function endPhase(gameID) {
 
       var gameEvent = new Event(gameID, 'End Phase');
       gameEvent.player = game.currentPlayer;
-      io.emit('chat message', game.currentPlayer.name + ' Draft Phase Ended. Starting Attack Phase');
+      io.emit('chat message', game.currentPlayer + ' Draft Phase Ended. Starting Attack Phase');
       io.emit('Attack Phase Start', gameEvent);
 
       break;
@@ -177,7 +177,7 @@ function endPhase(gameID) {
 
       var gameEvent = new Event(gameID, 'End Phase');
       gameEvent.player = game.currentPlayer;
-      io.emit('chat message', game.currentPlayer.name + 'Attack Phase Ended. Starting Fortify Phase');
+      io.emit('chat message', game.currentPlayer + 'Attack Phase Ended. Starting Fortify Phase');
       io.emit('Fortify Phase Start', gameEvent);
 
       break;

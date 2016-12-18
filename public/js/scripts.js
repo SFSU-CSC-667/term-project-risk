@@ -123,7 +123,7 @@ function initGame(gameState) {
     game.id = gameState.id;
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
-    } else if (gameState.currentPlayers == localStorage.getItem("userID")) {
+    } else if (gameState.currentPlayers == Number(localStorage.getItem("userID"))) {
         if (gameState.currentPhase == 'draft') {
             initDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
@@ -193,7 +193,7 @@ socket.on('Game Starting', function(event) {
     updateMap();
     setPlayerActive(event.currentPlayer);
     $("#setupText").hide();
-    if (localStorage.getItem("userID") == event.currentPlayer) {
+    if (Number(localStorage.getItem("userID")) == event.currentPlayer) {
         startDraft(event.currentPlayer);
     } else {
         $("#waitingText").show();
