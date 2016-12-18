@@ -44,9 +44,11 @@ function createGame() {
 function startGame(gameID) {
     var game = games[gameID];
     initTerritories(game);
-    console.log(gameID);
+    //console.log(gameID);
     var gameEvent = new Event(gameID, 'StartGame');
     io.emit("Game Starting", gameEvent);
+    startTurn(game, player);
+
     game.currentPhase = "draft";
     game.currentPlayer = game.players[0].id;
     //return player to start turn or do that here
@@ -105,8 +107,11 @@ function removePlayer(gameID, player) {
 }
 
 
-function startTurn(gameID, player) {
-    //set player
+function startTurn(gameID) {
+  var gameEvent = new Event(gameID, 'startTurn');
+  gameEvent.player = player;
+
+  io.emit('Player Joined', gameEvent);
 
 }
 
@@ -183,8 +188,6 @@ function endPhase(gameID) {
     default:
       console.log("Something went wrong.");
   }
-
-
 }
 
 function endGame(gameID) {
