@@ -128,8 +128,7 @@ function draft(gameID, player, territory, amount) {
     return true;
 }
 
-function endTurn(gameID, player) {
-    var game = games[gameID];
+function endTurn(game, player) {
     var playerIndex = game.players.indexOf(player);
 
     if (++playerIndex > 3)
@@ -137,14 +136,11 @@ function endTurn(gameID, player) {
 
     game.currentPlayer = game.players[playerIndex].id;
 
-
     var gameEvent = new Event(gameID, 'EndTurn');
     gameEvent.player = player;
-    io.emit('Draft Move', gameEvent);
+    io.emit(player.name + 'Ended Turn', gameEvent);
     game.currentPhase = "draft";
-
     return true;
-
 }
 
 //Assumes player has no remaining territories
@@ -158,6 +154,41 @@ function playerVictory(gameID, player) {
     return endGame(gameID);
 }
 
+function endPhase(gameID, player) {
+  switch(game.currentPhase) {
+    case "draft":
+      game.currentPhase = "attack";
+
+      var gameEvent = new Event(gameID, 'End Phase');
+      gameEvent.player = player;
+      io.emit(player.name + ' Draft Phase Ended. Starting Attack Phase', gameEvent);
+
+      break;
+
+    case "attack":
+      game.currentPhase = "fortify";
+
+      var gameEvent = new Event(gameID, 'End Phase');
+      gameEvent.player = player;
+      io.emit(player.name + 'Attack Phase Ended. Starting Fortify Phase', gameEvent);
+
+      break;
+
+    case "fortify":
+      endTurn(game, player);
+      break;
+    default:
+      console.log("Something went wrong.");
+  }
+
+  var gameEvent = new Event(gameID, 'EndTurn');
+  gameEvent.player = player;
+  io.emit('Draft Move', gameEvent);
+  game.currentPhase = "draft";
+
+
+}
+
 function endGame(gameID) {
     delete games[gameID];
     return true;
@@ -165,14 +196,14 @@ function endGame(gameID) {
 
 function calculateDraft(gameID, player) {
     var game = games[gameID];
-    var totalTerritories = games.territories.territoriesOwned(player);
-    var result = totalTerritories / 3;
+    var totalTerritories = game.territories.territoriesOwned(player);
+    var result = Math.floor(totalTerritories / 3);
 
     if (result < 3) { result = 3; }
 
-  game.currentDraftCount = result;
+    game.currentDraftCount = result;
 
-  return result;
+    return result;
 }
 
 function initTerritories(game) {
