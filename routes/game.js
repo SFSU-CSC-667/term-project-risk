@@ -29,15 +29,16 @@ io.on('connection', function(socket) {
 
 
 function createGame() {
-    var game = {};
-    game.id = maxGameID;
-    game.territories = new world.Map(maxGameID);
-    game.players = [];
-    game.currentPlayer = 0;
-    game.currentPhase = "setup";
-    games[maxGameID] = game;
-    maxGameID++;
-    return game;
+  var game = {};
+  game.id = maxGameID;
+  game.territories = new world.Map(maxGameID);
+  game.players = [];
+  game.currentPlayer = 0;
+  game.currentPhase = "setup";
+  game.currentDraftCount = 0;
+  games[maxGameID] = game;
+  maxGameID++;
+  return game;
 }
 
 function startGame(gameID) {
@@ -113,11 +114,9 @@ function draft(gameID, player, territory, amount) {
     var game = games[gameID];
     var player = game.players[player];
 
-    //Should we add check?
     if (!game.territories.isOwned()) return false;
 
     game.territories.addTroops(territory, amount);
-
 
     var gameEvent = new Event(gameID, 'DraftMove');
     gameEvent.player = player;
@@ -169,11 +168,11 @@ function calculateDraft(gameID, player) {
     var totalTerritories = games.territories.territoriesOwned(player);
     var result = totalTerritories / 3;
 
-    if (result < 3) {
-        result = 3;
-    }
+    if (result < 3) { result = 3; }
 
-    return result;
+  game.currentDraftCount = result;
+
+  return result;
 }
 
 function initTerritories(game) {
