@@ -48,9 +48,6 @@ function startGame(gameID) {
     var gameEvent = new Event(gameID, 'StartGame');
     io.emit("Game Starting", gameEvent);
     startTurn(game, player);
-
-    game.currentPhase = "draft";
-    game.currentPlayer = game.players[0].id;
     //return player to start turn or do that here
 }
 
@@ -108,10 +105,15 @@ function removePlayer(gameID, player) {
 
 
 function startTurn(gameID) {
+  var game = games[gameID];
+
+  game.currentPhase = "draft";
+  game.currentPlayer = game.players[0].id;
+
   var gameEvent = new Event(gameID, 'startTurn');
   gameEvent.player = player;
-
-  io.emit('Player Joined', gameEvent);
+  io.emit('chat message', game.currentPlayer.name + ' Starting Turn. Starting Draft Phase');
+  io.emit('Draft Phase Start', gameEvent);
 
 }
 
