@@ -168,9 +168,7 @@ function calculateDraft(gameID, player) {
     var totalTerritories = games.territories.territoriesOwned(player);
     var result = totalTerritories / 3;
 
-    if (result < 3) {
-        result = 3;
-    }
+    if (result < 3) { result = 3; }
 
   game.currentDraftCount = result;
 
