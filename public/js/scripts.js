@@ -80,11 +80,24 @@ function setTroops(territoryID, value) {
     item.textContent = value;
 }
 
-function draft(playerID) {
+function draft(data) {
     $("#setupText").hide();
     $('#waitingText').hide();
     $('#draftText').show();
-    $('#draftpill').removeClass("active").addClass('active');
+    $('#draftpill').removeClass("disabled").addClass('active');
+    $('#draft-amount').text(data);
+}
+
+function initDraft(playerID, gameid) {
+    var body = {};
+    body.playerid = playerID;
+    body.gameid = gameid;
+    game.draft = 0;
+    $.post(
+        "/game/draft",
+        body,
+        draft
+    );
     //enable tab, show text, calculate draft amount, do draft, end phase, go to attack
 
 }
@@ -100,7 +113,7 @@ function initGame(gameState) {
         $("#setupText").show();
     } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
         if (gameState.currentPhase == 'draft') {
-            draft(gameState.currentPlayer);
+            initDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
             //Do attack
             $('#draftText').hide();

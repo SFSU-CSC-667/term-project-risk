@@ -29,16 +29,16 @@ io.on('connection', function(socket) {
 
 
 function createGame() {
-  var game = {};
-  game.id = maxGameID;
-  game.territories = new world.Map(maxGameID);
-  game.players = [];
-  game.currentPlayer = 0;
-  game.currentPhase = "setup";
-  game.currentDraftCount = 0;
-  games[maxGameID] = game;
-  maxGameID++;
-  return game;
+    var game = {};
+    game.id = maxGameID;
+    game.territories = new world.Map(maxGameID);
+    game.players = [];
+    game.currentPlayer = 0;
+    game.currentPhase = "setup";
+    game.currentDraftCount = 0;
+    games[maxGameID] = game;
+    maxGameID++;
+    return game;
 }
 
 function startGame(gameID) {
@@ -165,14 +165,16 @@ function endGame(gameID) {
 
 function calculateDraft(gameID, player) {
     var game = games[gameID];
-    var totalTerritories = games.territories.territoriesOwned(player);
+    var totalTerritories = game.territories.territoriesOwned(player);
     var result = totalTerritories / 3;
 
-    if (result < 3) { result = 3; }
+    if (result < 3) {
+        result = 3;
+    }
 
-  game.currentDraftCount = result;
+    game.currentDraftCount = result;
 
-  return result;
+    return result;
 }
 
 function initTerritories(game) {
@@ -454,6 +456,10 @@ router.get('/:id/state', function(req, res, next) {
     } else {
         res.send(false);
     }
+});
+
+router.post('/draft', function(req, res, next) {
+    res.json(calculateDraft(req.body.gameid, req.body.playerid));
 });
 
 router.get('/:id', function(req, res, next) {
