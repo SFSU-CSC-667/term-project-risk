@@ -70,11 +70,20 @@ function removePlayer(gameId, player) {
 }
 
 function startTurn(gameId, player) {
+  //set player 
   
 }
 
-function draft(gameId, player) {
-  
+function draft(gameId, player, territory, amount) {
+  var game = games[gameId];
+  var player = game.players[player];
+
+  //Should we add check?
+  if(!game.territories.isOwned()) return false;
+
+  game.territories.addTroops(territory, amount);
+
+  return true;
 }
 
 function endTurn(gameID, player) {
@@ -106,17 +115,17 @@ function endGame(gameId) {
 }
 
 
-function setTerritories(game) {
+function initTerritories(game) {
   //var game = games[gameId];
 
   var playerIndex = 0;
   var territoryIndex = 1;
-  var totalTerritories = game.territories.territories.length;
+  var totalTerritories = game.territories.length;
   var totalTroops = 120;
 
   for (i = 0; i < totalTroops; i++) {
     game.territories.setPlayer(playerIndex, territoryIndex);
-    game.territories.addTroops(territoryIndex, 1);
+    addTroops(territoryIndex, 1);
     
     playerIndex++;
     territoryIndex++;
@@ -143,7 +152,7 @@ function attack(gameId, attackingTerritory, defendingTerrritory, attackingTroops
 
 }
 
-function simulate (attackingTroops, defendingTroops) {
+function simulate(attackingTroops, defendingTroops) {
 
   //Attacking Troops = 2
   if (attackingTroops == 2) {
@@ -352,6 +361,7 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
+  
 router.get('/:id/territories', function(req, res, next) {
   var currentGame = createGame();
   setTerritories(currentGame);
@@ -402,8 +412,7 @@ router.post('/events', function(req, res, next) {
       res.send(draft(res.body.event.gameid, res.body.event.player, res.body.event.territory, res.body.event.amount));
       break;
     case "Attack":
-      //not implemented
-      //res.send();
+      res.send(attack(res.body.event.gameid, res.body.event.territory, res.body.event.territory, res.body.event.amount, res.body.event.amount));
       break;
     case "BattleResult":
       //not implemented

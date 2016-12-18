@@ -108,4 +108,4 @@
   }
 input.qtyplus { width:25px; height:25px; background-color: lightgreen; border-radius: 3px;}
 input.qtyminus { width:25px; height:25px; background-color: #FF3333; border-radius: 3px;}
-input.deploy { width:100px; height:25px;}
+input.button { width:100px; height:25px;}

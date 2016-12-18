@@ -117,16 +117,31 @@
                     <area alt="westernEurope" title="westernEurope" href="#" id="20" coords="449,240,458,255,462,262,462,274,457,278,462,285,462,295,464,301,453,302,451,310,451,317,453,327,449,333,445,340,441,347,433,351,430,356,421,353,411,348,394,346,386,340,390,326,392,314,385,304,392,295,402,295,413,292,415,283,409,271,406,264,419,259,425,251,436,253,440,246" shape="poly" onclick="territoryClicked('westernEurope')">
                 </map>
 
-              <div id="myModal" class="modal">
+              <div id="deployModal" class="modal">
 
                 <!-- Modal content -->
                 <div class="modal-content">
-                  <span id='close' class="close">×</span>
+                  <span class="close">×</span>
                   <form id='myform' method='POST' action='#'>
                     <input type='button' value='-' class='qtyminus' field='quantity' />
-                    <input type='text' id="value" name='quantity' value='0' class='qty' />
+                    <input type='text' id="deployValue" name='quantity' value='0' class='qty' />
                     <input type='button' value='+' class='qtyplus' field='quantity' /><br><br>
                     <input type='button' id="deploy" value='Deploy' class='deploy' />
+                </form>
+                </div>
+
+              </div>
+
+              <div id="reinforceModal" class="modal">
+
+                <!-- Modal content -->
+                <div class="modal-content">
+                  <span class="close">×</span>
+                  <form id='myform' method='POST' action='#'>
+                    <input type='button' value='-' class='qtyminus' field='quantity' />
+                    <input type='text' id="reinforceValue" name='quantity' value='0' class='qty' />
+                    <input type='button' value='+' class='qtyplus' field='quantity' /><br><br>
+                    <input type='button' id="reinforce" value='Reinforce' class='button' />
                 </form>
                 </div>
 
