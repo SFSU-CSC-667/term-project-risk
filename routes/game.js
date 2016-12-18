@@ -44,9 +44,11 @@ function createGame() {
 function startGame(gameID) {
     var game = games[gameID];
     initTerritories(game);
-    console.log(gameID);
+    //console.log(gameID);
     var gameEvent = new Event(gameID, 'StartGame');
     io.emit("Game Starting", gameEvent);
+    startTurn(game, player);
+
     game.currentPhase = "draft";
     game.currentPlayer = game.players[0].id;
     //return player to start turn or do that here
@@ -105,8 +107,11 @@ function removePlayer(gameID, player) {
 }
 
 
-function startTurn(gameID, player) {
-    //set player
+function startTurn(gameID) {
+  var gameEvent = new Event(gameID, 'startTurn');
+  gameEvent.player = player;
+
+  io.emit('Player Joined', gameEvent);
 
 }
 
@@ -154,13 +159,14 @@ function playerVictory(gameID, player) {
     return endGame(gameID);
 }
 
-function endPhase(gameID, player) {
+function endPhase(gameID) {
+  var game = games[gameID];
   switch(game.currentPhase) {
     case "draft":
       game.currentPhase = "attack";
 
       var gameEvent = new Event(gameID, 'End Phase');
-      gameEvent.player = player;
+      gameEvent.player = game.currentPlayer;
       io.emit(player.name + ' Draft Phase Ended. Starting Attack Phase', gameEvent);
 
       break;
@@ -180,13 +186,6 @@ function endPhase(gameID, player) {
     default:
       console.log("Something went wrong.");
   }
-
-  var gameEvent = new Event(gameID, 'EndTurn');
-  gameEvent.player = player;
-  io.emit('Draft Move', gameEvent);
-  game.currentPhase = "draft";
-
-
 }
 
 function endGame(gameID) {
@@ -542,14 +541,14 @@ router.post('/events', function(req, res, next) {
             //not implemented
             //res.send();
             break;
-        case "TurnEnd":
-            res.send(endTurn(res.body.event.gameid, res.body.event.player));
+        case "EndPhase":
+            res.send(endPhase(req.body.event.gameid, req.body.event.player));
             break;
         case "PlayerEliminated":
-            res.send(playerElimination(res.body.event.gameid, res.body.event.player));
+            res.send(playerElimination(req.body.event.gameid, req.body.event.player));
             break;
         case "PlayerWon":
-            res.send(playerVictory(res.body.event.gameid, res.body.event.player));
+            res.send(playerVictory(req.body.event.gameid, req.body.event.player));
             break;
         default:
             console.log("this shouldn't happen");
