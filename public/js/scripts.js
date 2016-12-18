@@ -72,9 +72,20 @@ function setTroops(territoryID, value) {
 }
 
 function configureGame(gameState) {
-	for (i = 0; i < gameState.length; i++){
-		
+	for (i = 0; i < gameState.players.length; i++){
+		addPlayer(gameState.players[i].id, gameState.players[i].name);
 	}
+	if (gameState.currentPhase = 'setup') {
+		$("#setupText").removeClass('hidden');
+	} 
+}
+
+function addPlayer(playerID, playerName){
+	document.getElementById('players').innerHTML += '<li class="list-group-item" id="'+ playerID +'">'+ playerName + '</li>';
+}
+
+function removePlayer(playerID, playerName){
+	$('#' + playerID).remove();
 }
 
 

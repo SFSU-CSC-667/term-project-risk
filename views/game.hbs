@@ -46,6 +46,7 @@
                 <li role="presentation" class="disabled"><a href="#">Fortify</a></li>
               </ul>
               <!-- TODO Hook these up to the server via handlebars/socket -->
+              <div id="setupText" class="hidden"> Currently waiting for other players to join the game. The game will begin automatically when there are four players. </div>
               <div id="draftText" class="hidden"> You may draft X units this turn. Please click on the map to place them. 
                 <br> <button type="button" class="btn btn-danger">End Phase</button></div>
               <div id="attackText" class="hidden"> You may now attack! Please click on the territory you want to attack from, then an adjacent territory you are attacking. <br> <button type="button" class="btn btn-danger">End Phase</button></div>
@@ -57,11 +58,7 @@
         </div>
         <div class="col-md-3">
           <div class="col-md-12 panel panel-default">
-            <ul class="list-group">
-              <li class="list-group-item active">Player 1</li>
-              <li class="list-group-item">Player 2</li>
-              <li class="list-group-item">Player 3</li>
-              <li class="list-group-item">Player 4</li>
+            <ul class="list-group" id="players">
             </ul>
           </div>
         </div>

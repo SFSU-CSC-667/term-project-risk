@@ -4,6 +4,25 @@ var io = require('../app');
 var router = express.Router();
 var maxGameID = 0;
 var games = [];
+games[0] = createGame();
+playerone = {
+  id: 1, 
+  game: 0, 
+  name: 'Childish Gambino'
+};
+games[0].players.push(playerone);
+playertwo = {
+  id: 2, 
+  game: 0, 
+  name: 'Lil Yachty'
+};
+games[0].players.push(playertwo);
+playerthree = {
+  id: 3, 
+  game: 0, 
+  name: 'Paper Boi'
+};
+games[0].players.push(playerthree);
 
 //This creates a new game map with our gameid. No players are assigend to this map
 //var map = new world.Map("1");
@@ -43,7 +62,7 @@ function startGame(gameId) {
   var game = games[gameId];
   initTerritories(game);
 
-
+  
   //return player to start turn or do that here
 }
 

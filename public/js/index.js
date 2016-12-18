@@ -44,5 +44,7 @@ function createPlayer(data) {
 }
 
 function joinGame() {
-
+    var data = {};
+    data.id = $('#gameid').val();
+    createPlayer(data);
 }
