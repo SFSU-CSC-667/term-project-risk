@@ -2,7 +2,7 @@ var express = require('express');
 var world = require("./map.js");
 var io = require('../app');
 var router = express.Router();
-var maxGameID = 1;
+var maxGameID = 0;
 var games = [];
 
 //This creates a new game map with our gameid. No players are assigend to this map
@@ -26,12 +26,14 @@ io.on('connection', function(socket) {
     });
 });
 
+
 function createGame() {
   var game = {};
   game.id = maxGameID;
   game.territories = new world.Map(maxGameID);
   game.players = [];
   game.currentPlayer = 0;
+  game.currentPhase = "setup";
   games[maxGameID] = game;
   maxGameID++
   return game;
@@ -46,7 +48,7 @@ function startGame(gameId) {
 }
 
 function addPlayer(gameId, player) {
-	var game = games[gameID];
+	var game = games[gameId];
 	//TODO: Need some validation on the player object
 	game.players.push(player);
 	if (game.players.length >= 4) {
@@ -56,7 +58,7 @@ function addPlayer(gameId, player) {
 }
 
 function removePlayer(gameId, player) {
-  var game = games[gameID];
+  var game = games[gameId];
   var index = game.players.indexOf(player); //may not work because of object reference. But I think it should. not tested
   game.players.splice(index, 1);
 
@@ -347,7 +349,7 @@ function diceRoll() {
 
 /* This file will contain all of the backend game logic */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Create a game!' });
+  res.render('index');
 });
 
 router.get('/:id/territories', function(req, res, next) {
@@ -356,9 +358,20 @@ router.get('/:id/territories', function(req, res, next) {
   res.send(currentGame);
 });
 
+router.get('/:id/state', function(req, res, next) {
+    game = games[req.params.id];
+    console.log(req.params);
+    console.log(games);
+    if (game != null) {
+      res.send(game);
+    } else {
+      res.send(false);
+    }
+});
+
 router.get('/:id', function(req, res, next) {
   game = games[req.params.id];
-  res.render('game', { key: 'This could be a value!' });
+  res.render('game', { gameid: req.params.id });
   //Eventually the code will work like this
   /*
   game = games[req.params.id];
@@ -371,12 +384,13 @@ router.get('/:id', function(req, res, next) {
 });
 
 router.post('/events', function(req, res, next) {
-	switch (req.body.event.type){
+  console.log(req.body);
+	switch (req.body.type){
     case "CreateGame":
       res.send(createGame());
       break;
     case "PlayerJoined": 
-      res.send(addPlayer(res.body.event.gameid, res.body.event.player));
+      res.send(addPlayer(req.body.gameid, req.body.player));
       break;
     case "PlayerLeft":
       res.send(removePlayer(res.body.event.gameid, res.body.event.player));
