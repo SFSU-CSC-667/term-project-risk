@@ -120,15 +120,14 @@ function initGame(gameState) {
     drawMap(gameState.territories.territories);
     setPlayerActive(gameState.currentPlayer);
     game.currentPhase = gameState.currentPhase;
+    game.id = gameState.id;
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
-    } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
+    } else if (gameState.currentPlayers == localStorage.getItem("userID")) {
         if (gameState.currentPhase == 'draft') {
             initDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
-            //Do attack
-            $('#draftText').hide();
-            $('#attackText').show();
+            startAttack(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'fortify') {
             //Do fortify
             $('#attackText').hide();
@@ -137,6 +136,16 @@ function initGame(gameState) {
     } else {
         $('#waitingText').show();
     }
+}
+
+function endPhase() {
+	var body = {};
+	body.gameid = game.id;
+	body.type = "PhaseEnd";
+	$.post(
+        "/game/events",
+        body
+    );
 }
 
 function addPlayer(playerID, playerName) {
@@ -165,11 +174,19 @@ function updateMap() {
     );
 }
 
-function setPlayerActive(playerID) {
+function setPlayerActive(playerID, gameID) {
     $('.active').each(function(i, obj) {
         $(this).removeClass("active");
     });
     $('#player_' + playerID).addClass('active');
+}
+
+function startAttack(playerID) {
+    $('#waitingText').hide();
+    $('#draftText').hide();
+    $('#draftpill').removeClass("active").addClass('disabled');
+    $('#attackpill').removeClass("disabled").addClass('active');
+    $('#attackText').show();
 }
 
 socket.on('Game Starting', function(event) {
@@ -178,6 +195,13 @@ socket.on('Game Starting', function(event) {
     $("#setupText").hide();
     if (localStorage.getItem("userID") == event.currentPlayer) {
         startDraft(event.currentPlayer);
+    } else {
+        $("#waitingText").show();
+    }
+}).on('Attack Phase Start', function(event) {
+	console.log(event);
+    if (localStorage.getItem("userID") == (event.currentPlayer + "")) {
+        startAttack(event.currentPlayer, event.game);
     } else {
         $("#waitingText").show();
     }
