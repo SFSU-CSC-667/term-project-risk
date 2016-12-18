@@ -1,22 +1,30 @@
 var express = require('express');
 var world = require("./map.js");
+var io = require('../app');
 var router = express.Router();
 var maxGameID = 1;
-var games = {};
+var games = [];
 
 //This creates a new game map with our gameid. No players are assigend to this map
-var map = new world.Map("1");
+//var map = new world.Map("1");
 //You can give players control of a territory using it's ID
 //Giving playerid 1 control of territory 2
-map.setPlayer(1, 2);
+//map.setPlayer(1, 2);
 //Let's add some troops to his territory
 //Giving territory 2, 6 troops
-map.addTroops(2, 6);
+//map.addTroops(2, 6);
 //We can determine if the territory is ajacent to another territory
-console.log(map.isAjacent(2, 1));
+//console.log(map.isAjacent(2, 1));
 //And we can also count how many territories someone has
-console.log(map.territoriesOwned(1));
+//console.log(map.territoriesOwned(1));
 
+// Socket stuff
+io.on('connection', function(socket) {
+  io.emit('chat message', 'Welcome to the game!');
+    socket.on('chat message', function(msg) {
+      io.emit('chat message', msg);
+    });
+});
 
 function createGame() {
   var game = {};
@@ -351,8 +359,16 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Create a game!' });
 });
 
+  
+router.get('/:id/territories', function(req, res, next) {
+  var currentGame = createGame();
+  setTerritories(currentGame);
+  res.send(currentGame);
+});
+
 router.get('/:id', function(req, res, next) {
-  res.render('game', { title: 'Create a game!' });
+  game = games[req.params.id];
+  res.render('game', { key: 'This could be a value!' });
   //Eventually the code will work like this
   /*
   game = games[req.params.id];
@@ -362,10 +378,6 @@ router.get('/:id', function(req, res, next) {
     res.render('index', { title: 'Create a game!' });
   }
   */
-});
-
-router.get('/territories', function(req, res, next) {
-  res.send(map);
 });
 
 router.post('/events', function(req, res, next) {
