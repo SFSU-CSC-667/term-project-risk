@@ -76,9 +76,27 @@ function configureGame(gameState) {
 	for (i = 0; i < gameState.players.length; i++){
 		addPlayer(gameState.players[i].id, gameState.players[i].name);
 	}
+	setPlayerActive(gameState.currentPlayer);
 	if (gameState.currentPhase = 'setup') {
 		$("#setupText").show();
-	} 
+	} else if (gameState.currentPlayer == localStorage.getItem("userID")) {
+		if (gameState.currentPhase = 'draft'){
+			//Do draft
+			$("#setupText").hide();
+			$('#waitingText').hide();
+			$('#draftText').show();
+		} else if (gameState.currentPhase = 'attack') {
+			//Do attack
+			$('#draftText').hide();
+			$('#attackText').show();
+		} else if (gameState.currentPhase = 'fortify') {
+			//Do fortify
+			$('#attackText').hide();
+			$('#fortifyText').show();
+		}
+	} else {
+		$('#waitingText').show();
+	}
 }
 
 function addPlayer(playerID, playerName){
