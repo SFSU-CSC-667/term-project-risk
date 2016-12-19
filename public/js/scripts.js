@@ -155,8 +155,8 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
         	
         	var body = {};
 	    	body.playerid = parseInt(game.currentPlayer);
-	    	body.targetterritory = sourceID;
-	    	body.sourceterritory = destID;
+	    	body.targetterritory = destID;
+	    	body.sourceterritory = sourceID;
 	    	body.amount = parseInt(document.getElementById('reinforceValue').value);
 	    	body.type = "Fortify";
 	    	console.log(body);
