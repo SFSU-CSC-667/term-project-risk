@@ -39,13 +39,14 @@ function territoryClicked(name, id) {
         	}
     	}
     	else {
-    		alert("CLick on your own territory");	//click on your territory
+    		alert("Click on your own territory");	//click on your territory
     	}
 
     } 
     else if (game.currentPhase == "attack") {
     	clickCount++;
     	if(clickCount == 1) {
+       		console.log(clickCount+" "+game.territories[id-1].player+" "+game.currentPlayer);
         	if(game.territories[id-1].player == game.currentPlayer) {
 				sourceTerritoryText = document.getElementById(name+"Text");
 				sourceID = id;
@@ -55,9 +56,11 @@ function territoryClicked(name, id) {
 			}
 			else {
 				alert("Select your own territory");
+				clickCount = 0;
 			}
 		}
 		else if(clickCount == 2) {
+			console.log(clickCount+" "+game.territories[id-1].player+" "+game.currentPlayer)
 			if(game.territories[id-1].player != game.currentPlayer) {
 				destID = id;
 				$('#attackTextAdditional').hide();
@@ -66,8 +69,8 @@ function territoryClicked(name, id) {
 	        else {
 	        	alert("Select an enemy territory")
 	        }
+	        clickCount = 0;
 	    }
-	    clickCount = 0;
 	}
     else if (game.currentPhase == "fortify") {
     	if(game.territories[id-1].player == game.currentPlayer) {
@@ -161,7 +164,7 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
 	    }
 	}
 	else {
-		alert("Please select an adjacent territory");
+		alert("Please select an adjacent friendly territory");
 	}
 }
 
@@ -178,7 +181,7 @@ function attack(name, attackTroops, sourceTerritoryText, sourceID, destID) {
 	    ///Hides when you click Deploy button
 	    document.getElementById('attack').onclick = function() {
             document.getElementById('attackModal').style.display = "none";
-            console.log("Attacked with" + document.getElementById('attackValue').value + " troops against " + name);
+            console.log("Attacked with " + document.getElementById('attackValue').value + " troops against " + name);
             document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) - parseInt(document.getElementById('attackValue').value);
         	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('attackValue').value);
         }
@@ -193,7 +196,7 @@ function attack(name, attackTroops, sourceTerritoryText, sourceID, destID) {
 	    }
 	}
 	else {
-		alert("Please select an enemy territory");
+		alert("Please select a neighbouring enemy territory");
 	}
 }
 
@@ -413,6 +416,13 @@ jQuery(document).ready(function() {
             	$('#reinforceValue').val(currentVal + 1);
         	} 
         }
+        else if (game.currentPhase == "attack") {
+        	currentVal = parseInt($('#attackValue').val());
+        	if(!isNaN(currentVal)&&currentVal < upLimit) {
+            	// Increment
+            	$('#attackValue').val(currentVal + 1);
+        	} 
+        }
         
     });
     // This button will decrement the value till 0
@@ -435,6 +445,13 @@ jQuery(document).ready(function() {
         	if(!isNaN(currentVal)&&currentVal > 0) {
             	// Increment
             	$('#reinforceValue').val(currentVal - 1);
+        	} 
+        }
+        else if (game.currentPhase == "attack") {
+        	currentVal = parseInt($('#attackValue').val());
+        	if(!isNaN(currentVal)&&currentVal > 0) {
+            	// Increment
+            	$('#attackValue').val(currentVal - 1);
         	} 
         }
     });
