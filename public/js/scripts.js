@@ -71,7 +71,7 @@ function territoryClicked(name, id) {
 	        }
 	    }
 	    else {
-    		alert("CLick on your own territory");	//click on your territory
+    		alert("Click on your own territory");	//click on your territory
     	}
     }
 }
