@@ -503,7 +503,7 @@ jQuery(document).ready(function() {
     document.getElementById('sendButton').onclick = function() {
     	var msgobj = {};
     	msgobj.gameid = $('#gameid').val();
-    	if (localStorage.getItem("userID") == null) {
+    	if (localStorage.getItem("userID") == null || ($('#player_' + localStorage.getItem("userID")) == null)) {
     		msgobj.message = 'Spectator: ' + $('#text').val();
     	} else {
     		msgobj.message = $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val();
