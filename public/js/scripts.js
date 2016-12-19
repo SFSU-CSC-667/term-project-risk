@@ -9,15 +9,12 @@ colors[3] = "green";
 
 var currentPlayers = 0;
 var clickCount = 0;
-var reinforceTroops, attackTroops, sourceTerritory, sourceID, destID, upLimit, playerName;
-socket.on('get name', function(name) {
-    playerName = name;
-});
+var reinforceTroops, attackTroops, sourceTerritory, sourceID, destID, upLimit;
 socket.on('welcome', function(msg){
     $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
 });
 socket.on('chat message', function(msg){
-    $('#messages').append($('<li>').text(playerName + ": " + msg));
+    $('#messages').append($('<li>').text(msg));
 });
 
 function territoryClicked(name, id) {
