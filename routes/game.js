@@ -111,11 +111,16 @@ function startTurn(gameID) {
 
 }
 
-function draft(gameID, player, territory, amount) {
+function draft(gameID, playerid, territory, amount) {
     var game = games[gameID];
-    var player = game.players[player];
+    var player;
+    for (i = 0; i < game.players.length; i++){
+        if (game.players[i].id = playerid) player = game.players[i];
+    }
+    if (player == null) return false;
+    console.log(player);
 
-    if (!game.territories.isOwned()) return false;
+    if (game.territories.territories[territory - 1].player != playerid) return false;
 
     game.territories.addTroops(territory, amount);
 
@@ -522,7 +527,7 @@ router.post('/events', function(req, res, next) {
             res.send(startTurn(req.body.event.gameid, req.body.event.player));
             break;
         case "DraftMove":
-            res.send(draft(req.body.event.gameid, req.body.event.player, req.body.event.territory, req.body.event.amount));
+            res.send(draft(req.body.gameid, req.body.playerid, req.body.territory, req.body.amount));
             break;
         case "Attack":
             res.send(attack(req.body.event.gameid, req.body.event.territory, req.body.event.territory, req.body.event.amount, req.body.event.amount));

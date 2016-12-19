@@ -85,6 +85,12 @@ function deploy(name) {
             console.log("Deployed " + document.getElementById('deployValue').value + " in " + name);
             document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('deployValue').value);
             document.getElementById('draft-amount').textContent = parseInt(document.getElementById('draft-amount').textContent) - parseInt(document.getElementById('deployValue').value);
+        	var body = {};
+        	body.player = game.currentPlayer;
+        	body.territory = parseInt(document.getElementById(name + 'Text').id);
+        	body.amount = parseInt(document.getElementById('draft-amount').textContent);
+        	body.type = "DraftMove";
+        	sendEvent(body);
         }
         //Hides model when you click away or click the close button
     document.getElementsByClassName("close")[0].onclick = function() {
@@ -130,8 +136,12 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
 }
 
 function setColor(territoryID, playerID) {
-    var color = $('#player_color_' + playerID).attr('class').split(' ')[1];
-    $('#' + document.getElementById(territoryID).alt + 'Text').css("color", color);
+	if (playerID == 0) {
+		return;
+	} else {
+	    var color = $('#player_color_' + playerID).attr('class').split(' ')[1];
+	    $('#' + document.getElementById(territoryID).alt + 'Text').css("color", color);
+	}
 }
 
 function setTroops(territoryID, value) {
@@ -189,14 +199,18 @@ function initGame(gameState) {
     }
 }
 
-function endPhase() {
-	var body = {};
+function sendEvent(body){
 	body.gameid = game.id;
-	body.type = "PhaseEnd";
 	$.post(
         "/game/events",
         body
     );
+}
+
+function endPhase() {
+	var body = {};
+	body.type = "PhaseEnd";
+	sendEvent(body);
 }
 
 function addPlayer(playerID, playerName) {
