@@ -287,24 +287,42 @@ function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops,
     //attacking verifications:
 
     //attacking player owns source territory
-    if(game.map.territories[attackingTerritory].player != playerID) return false;
+    if(game.map.territories[attackingTerritory - 1].player != playerID) return false;
 
     //attack player doesn’t own target territory
-    if(game.map.territories[defendingTerritory].player == playerID) return false;
+    if(game.map.territories[defendingTerritory - 1].player == playerID) return false;
 
     //source territory is adjacent to target territory
     if(!game.map.isAjacent(attackingTerritory, defendingTerritory)) return false;
 
     //attack amount is >= source territory troop amount + 1
-    if(attackingTroops >= game.map.territories[attackingTerritory].troops) return false;
+    if(attackingTroops >= game.map.territories[attackingTerritory - 1].troops + 1) return false;
 
+    var defendingTroops = game.map.territories[defendingTerritory - 1].troops;
 
-    var result = simulate(attackingTroops, game.map.territories[defendingTerrritory].troops);
-    //results = array containing num of remaining troops in territories
+    do {
+      //results = array containing num of remaining troops in territories
+      var result = simulate(attackingTroops, game.map.territories[defendingTerritory - 1].troops);
+      attackingTroops = attackingTroops - result[0]; //attackingTroops in result[0]
+      defendingTroops = defendingTroops - result[1]; //defendingTroops in result[1]
 
-    game.map.addTroops(attackingTerritory, attackingTroops - result[0]); //attackingTroops in result[0]
-    game.map.addTroops(defendingTerrritory, defendingTroops - result[1]); //defendingTroops in result[1]
+      game.map.addTroops(attackingTerritory, attackingTroops - game.map.territories[attackingTerritory - 1].troops);
+      game.map.addTroops(defendingTerritory, defendingTroops - game.map.territories[defendingTerritory - 1].troops);
+    } while(attackingTroops > 1 & defendingTroops > 0);
 
+    var gameEvent = new Event(gameID, 'Battle Result');
+    gameEvent.player = game.currentPlayer;
+    var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
+    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory].player).name;
+
+    if(defendingTroops == 0) {
+      io.emit('chat message', AttackerName + ' has defeated ' + DefenderName);
+      io.emit('Attack', gameEvent);
+
+    } else {
+      io.emit('chat message', AttackerName + ' has lost to ' + DefenderName);
+      io.emit('Attack Phase Start', gameEvent);
+    }
 
     return true;
 
@@ -541,17 +559,17 @@ function fortify(gameID, playerID, sourceterritory, targetterritory, amount){
     console.log(game.map.territories[sourceterritory - 1].player);
     console.log(game.map.territories[targetterritory - 1].player);
     console.log(game.map.territories[sourceterritory - 1].troops);
-    if ((player == false) 
-        || (game.map.territories[sourceterritory - 1].player != player.id || 
-            game.map.territories[targetterritory - 1].player != player.id) 
+    if ((player == false)
+        || (game.map.territories[sourceterritory - 1].player != player.id ||
+            game.map.territories[targetterritory - 1].player != player.id)
         || (game.map.territories[sourceterritory - 1].troops <= amount)){
         console.log("Failed validation");
         return false;
-    } 
+    }
     game.map.addTroops(sourceterritory, amount * -1);
     game.map.addTroops(targetterritory, amount);
 
-    io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' 
+    io.emit('chat message', player.name + ' has moved ' + amount + ' troops from '
         + game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
     endPhase(gameID);
 }
