@@ -2,6 +2,9 @@ var express = require('express');
 var world = require("./map.js");
 var io = require('../app');
 var Event = require('./event.js');
+var pgp = require('pg-promise')();
+//TODO CONFIGURE POSTGRES
+var db = pgp('postgres://john:123@localhost:5432/products');
 var router = express.Router();
 var maxGameID = 0;
 var games = [];
@@ -14,6 +17,24 @@ io.on('connection', function(socket) {
     });
 });
 
+function getChatMessages(gameID){
+    //get chat messages from chat table
+
+}
+
+function insertChatMessage(gameID, message){
+    //insert chat messages into chat table
+}
+
+
+function getGame(gameID){
+    //query database, get game from game table and territories from territory tables
+}
+
+function storeGame(game){
+    //put game object in game table, 
+    //put territories object in territories table
+}
 
 function createGame() {
     var game = {};
