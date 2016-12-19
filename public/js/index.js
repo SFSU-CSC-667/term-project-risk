@@ -33,6 +33,7 @@ function createPlayer(data) {
         event.player.id = localStorage.getItem("userID");
         event.player.game = data.id;
         event.type = "PlayerJoined";
+        console.log(event);
         $.post(
             "/game/events",
             event,

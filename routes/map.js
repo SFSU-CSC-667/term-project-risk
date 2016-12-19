@@ -299,7 +299,11 @@ this.Map = function(gameid) {
     		if (this.territories[a-1].adjacent[i] == b) return true;
     	}
         return false;
-    };
+    }
+    
+	this.loadTerritories = function(newTerritories) {
+		this.territories = newTerritories;
+	}
     this.setPlayer = function(playerID, territoryID) {
         this.territories[territoryID-1].player = playerID;
     };
