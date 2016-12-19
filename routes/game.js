@@ -79,7 +79,7 @@ function getMaxGameID() {
 function createGame(res) {
     getMaxGameID().then(function(data) {
         var game = {};
-        game.id = data.max == null ? 0 : data.max;
+        game.id = data.max == null ? 0 : data.max+1;
         game.map = new world.Map(game.id);
         game.players = [];
         game.currentPlayer = 0;
@@ -206,7 +206,7 @@ function draft(res, gameID, playerid, territory, amount) {
         game.map.addTroops(territory, amount);
 
         updateGame(game).then(function(data) {
-            var gameEvent = new Event(gameID, 'DraftMove');
+            var gameEvent = new Event(game.id, 'DraftMove');
             gameEvent.player = player;
             gameEvent.territory = territory;
             gameEvent.amount = amount;
@@ -218,10 +218,8 @@ function draft(res, gameID, playerid, territory, amount) {
     });
 }
 
-function endTurn(gameID) {
-    var game = games[gameID];
-
-    var gameEvent = new Event(gameID, 'EndTurn');
+function endTurn(res, game) {
+    var gameEvent = new Event(game.id, 'EndTurn');
     gameEvent.player = game.currentPlayer;
     var name = getPlayerByID(game.players, game.currentPlayer).name;
     io.emit('End Turn', gameEvent);
@@ -233,15 +231,16 @@ function endTurn(gameID) {
         playerIndex = 0;
 
     game.currentPlayer = game.players[playerIndex].id;
-
-    var gameEvent = new Event(gameID, 'StartTurn');
-    gameEvent.player = game.currentPlayer;
-    name = getPlayerByID(game.players, game.currentPlayer).name;
-    io.emit('Start Turn', gameEvent);
-    io.emit('chat message', name + ' has started their turn.');
-
     game.currentPhase = "draft";
-    return true;
+
+    updateGame(game).then(function(data) {
+        var gameEvent = new Event(game.id, 'StartTurn');
+        gameEvent.player = game.currentPlayer;
+        name = getPlayerByID(game.players, game.currentPlayer).name;
+        io.emit('Start Turn', gameEvent);
+        io.emit('chat message', name + ' has started their turn.');
+        res.send(true);
+    });
 }
 
 //Assumes player has no remaining territories
@@ -263,7 +262,7 @@ function endPhase(res, gameID) {
                 game.currentPhase = "attack";
                 game.currentDraftCount = -1;
                 updateGame(game).then(function(data) {
-                    var gameEvent = new Event(gameID, 'End Phase');
+                    var gameEvent = new Event(game.id, 'End Phase');
                     gameEvent.player = game.currentPlayer;
                     var name = getPlayerByID(game.players, game.currentPlayer).name;
                     io.emit('chat message', name + ' Draft Phase Ended. Starting Attack Phase');
@@ -277,17 +276,18 @@ function endPhase(res, gameID) {
                 game.currentPhase = "fortify";
 
                 updateGame(game).then(function(data) {
-                    var gameEvent = new Event(gameID, 'End Phase');
+                    var gameEvent = new Event(game.id, 'End Phase');
                     gameEvent.player = game.currentPlayer;
                     var name = getPlayerByID(game.players, game.currentPlayer).name;
                     io.emit('chat message', name + ' Attack Phase Ended. Starting Fortify Phase');
                     io.emit('Fortify Phase Start', gameEvent);
+                    res.send("ok");
                 });
 
                 break;
 
             case "fortify":
-                endTurn(gameID);
+                endTurn(res, game);
                 break;
             default:
                 console.log("Something went wrong.");
@@ -303,7 +303,7 @@ function endGame(gameID) {
 function calculateDraft(res, gameID, player) {
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
-        if (game.currentDraftCount != -1) return game.currentDraftCount;
+        if (game.currentDraftCount != -1) res.json(game.currentDraftCount);
         var totalTerritories = game.map.territoriesOwned(player);
         var result = Math.floor(totalTerritories / 3);
 
@@ -338,70 +338,73 @@ function initTerritories(game) {
     }
 }
 
-function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops, playerID) {
-    var game = games[gameID];
+function attack(res, gameID, attackingTerritory, defendingTerritory, attackingTroops, playerID) {
+    getGame(gameID).then(function(data) {
+        var game = buildGame(data);
 
-    //attacking verifications:
+        //attacking verifications:
 
-    //attacking player owns source territory
-    if (game.map.territories[attackingTerritory - 1].player != playerID) {
-        return false;
-    }
+        //attacking player owns source territory
+        if (game.map.territories[attackingTerritory - 1].player != playerID) {
+            return false;
+        }
 
-    //attack player doesn’t own target territory
-    if (game.map.territories[defendingTerritory - 1].player == playerID) {
-        return false;
-    }
+        //attack player doesn’t own target territory
+        if (game.map.territories[defendingTerritory - 1].player == playerID) {
+            return false;
+        }
 
-    //source territory is adjacent to target territory
-    if (!game.map.isAdjacent(attackingTerritory, defendingTerritory)) {
-        return false;
-    }
+        //source territory is adjacent to target territory
+        if (!game.map.isAdjacent(attackingTerritory, defendingTerritory)) {
+            return false;
+        }
 
-    //attack amount is >= source territory troop amount
-    if (attackingTroops >= game.map.territories[attackingTerritory - 1].troops) {
-        return false;
-    }
+        //attack amount is >= source territory troop amount
+        if (attackingTroops >= game.map.territories[attackingTerritory - 1].troops) {
+            return false;
+        }
 
-    if (attackingTroops == 0 || game.map.territories[attackingTerritory - 1].player == 0) {
-        return false;
-    }
+        if (attackingTroops == 0 || game.map.territories[attackingTerritory - 1].player == 0) {
+            return false;
+        }
 
-    var attackers = attackingTroops;
-    game.map.territories[attackingTerritory - 1].troops -= attackers;
-    var defenders = game.map.territories[defendingTerritory - 1].troops;
-    var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
-    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory - 1].player).name;
-    var AttackTerritoryName = game.map.territories[attackingTerritory - 1].name;
-    var DefendTerritoryName = game.map.territories[defendingTerritory - 1].name;
+        var attackers = attackingTroops;
+        game.map.territories[attackingTerritory - 1].troops -= attackers;
+        var defenders = game.map.territories[defendingTerritory - 1].troops;
+        var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
+        var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory - 1].player).name;
+        var AttackTerritoryName = game.map.territories[attackingTerritory - 1].name;
+        var DefendTerritoryName = game.map.territories[defendingTerritory - 1].name;
 
-    console.log("Attacking " + attackers + " Defending " + defenders);
+        console.log("Attacking " + attackers + " Defending " + defenders);
 
 
-    while (attackers > 0 && defenders > 0) {
-        var result = simulate(attackers, defenders);
-        attackers = result[0];
-        defenders = result[1];
-        console.log("AfterBattle: Attackers " + attackers + " Defending " + defenders);
-    }
+        while (attackers > 0 && defenders > 0) {
+            var result = simulate(attackers, defenders);
+            attackers = result[0];
+            defenders = result[1];
+            console.log("AfterBattle: Attackers " + attackers + " Defending " + defenders);
+        }
 
-    if (defenders == 0) {
-        game.map.setPlayer(playerID, defendingTerritory);
-        game.map.territories[defendingTerritory - 1].troops = attackers;
-        io.emit('chat message', AttackTerritoryName + ' (' + AttackerName + ') has attacked ' + DefendTerritoryName + ' (' + DefenderName + ') and taken the territory!');
-    } else {
-        game.map.territories[defendingTerritory - 1].troops = defenders;
-        io.emit('chat message', AttackTerritoryName + ' (' + AttackerName + ') has attacked ' + DefendTerritoryName + ' (' + DefenderName + ') and was defeated!');
-    }
+        if (defenders == 0) {
+            game.map.setPlayer(playerID, defendingTerritory);
+            game.map.territories[defendingTerritory - 1].troops = attackers;
+            io.emit('chat message', AttackTerritoryName + ' (' + AttackerName + ') has attacked ' + DefendTerritoryName + ' (' + DefenderName + ') and taken the territory!');
+        } else {
+            game.map.territories[defendingTerritory - 1].troops = defenders;
+            io.emit('chat message', AttackTerritoryName + ' (' + AttackerName + ') has attacked ' + DefendTerritoryName + ' (' + DefenderName + ') and was defeated!');
+        }
 
-    console.log("Attacking territory " + game.map.territories[attackingTerritory - 1].troops);
-    console.log("Defending territory " + game.map.territories[defendingTerritory - 1].troops);
+        updateGame(game).then(function(data) {
+            var gameEvent = new Event(game.id, 'Battle Result');
+            gameEvent.player = game.currentPlayer;
+            io.emit('Battle Result', gameEvent);
 
-    var gameEvent = new Event(gameID, 'Battle Result');
-    gameEvent.player = game.currentPlayer;
-    io.emit('Battle Result', gameEvent);
+            res.send(true);
+        });
+    });
 
-    return true;
+
 
 }
 
@@ -589,22 +592,33 @@ function diceRoll() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
-function fortify(gameID, playerID, sourceterritory, targetterritory, amount) {
-    var game = games[gameID];
-    var player = getPlayerByID(game.players, playerID);
-    if ((player == false) ||
-        (game.map.territories[sourceterritory - 1].player != player.id ||
-            game.map.territories[targetterritory - 1].player != player.id) ||
-        (game.map.territories[sourceterritory - 1].troops <= amount)) {
-        console.log("Failed validation");
-        return false;
-    }
-    game.map.territories[sourceterritory - 1].troops -= parseInt(amount);
-    game.map.territories[targetterritory - 1].troops += parseInt(amount);
+function fortify(res, gameID, playerID, sourceterritory, targetterritory, amount) {
+    getGame(gameID).then(function(data) {
+        var game = buildGame(data);
 
-    io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' +
-        game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
-    endPhase(gameID);
+        var player = getPlayerByID(game.players, playerID);
+        if ((player == false) ||
+            (game.map.territories[sourceterritory - 1].player != player.id ||
+                game.map.territories[targetterritory - 1].player != player.id) ||
+            (game.map.territories[sourceterritory - 1].troops <= amount)) {
+            console.log("Failed validation");
+            res.send(false);
+        } else {
+            game.map.territories[sourceterritory - 1].troops -= parseInt(amount);
+            game.map.territories[targetterritory - 1].troops += parseInt(amount);
+        }
+
+        updateGame(game).then(function(data) {
+            io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' +
+                game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
+            var gameEvent = new Event(game.id, 'Battle Result');
+            gameEvent.player = game.currentPlayer;
+            io.emit('Fortify Move', gameEvent);
+
+            endPhase(res, game.id);
+        });
+    });
+
 }
 
 
@@ -662,23 +676,20 @@ router.post('/events', function(req, res, next) {
         case "PlayerLeft":
             res.send(removePlayer(req.body.event.gameid, req.body.event.player));
             break;
-        case "TurnStart":
-            res.send(startTurn(req.body.event.gameid, req.body.event.player));
-            break;
         case "DraftMove":
             draft(res, req.body.gameid, req.body.playerid, req.body.territory, req.body.amount);
             break;
         case "Attack":
-            res.send(attack(req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.playerid));
+            attack(res, req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.playerid);
             break;
         case "Fortify":
-            res.send(fortify(req.body.gameid, req.body.playerid, req.body.sourceterritory, req.body.targetterritory, req.body.amount));
+            fortify(res, req.body.gameid, req.body.playerid, req.body.sourceterritory, req.body.targetterritory, req.body.amount);
             break;
         case "PhaseEnd":
             endPhase(res, req.body.gameid);
             break;
         case "TurnEnd":
-            res.send(endTurn(req.body.event.gameid, req.body.event.player));
+            endTurn(res, req.body.event.gameid, req.body.event.player);
             break;
         case "PlayerEliminated":
             res.send(playerElimination(req.body.event.gameid, req.body.event.player));

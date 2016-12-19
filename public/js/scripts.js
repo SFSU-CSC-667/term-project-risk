@@ -230,6 +230,7 @@ function startDraft(playerID, gameid) {
     body.playerid = playerID;
     body.gameid = gameid;
     game.draft = 0;
+    console.log("FETCHING DRAFT");
     $.post(
         "/game/draft",
         body,
@@ -265,6 +266,7 @@ function initGame(gameState) {
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
     } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
+    	console.log("CURRENT PHASE " + gameState.currentPhase);
         if (gameState.currentPhase == 'draft') {
             startDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
@@ -393,6 +395,9 @@ socket.on('Game Starting', function(event) {
     updateGame();
     updateMap();
 }).on('Battle Result', function(event) {
+    updateGame();
+    updateMap();
+}).on('Fortify Move', function(event) {
     updateGame();
     updateMap();
 });
