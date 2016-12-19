@@ -528,19 +528,8 @@ function diceRoll() {
 }
 
 function fortify(gameID, playerID, sourceterritory, targetterritory, amount){
-    console.log("fortify fortify fortify fortify ");
-    console.log(gameID);
-    console.log(playerID);
-    console.log(sourceterritory);
-    console.log(targetterritory);
-    console.log(amount);
     var game = games[gameID];
     var player = getPlayerByID(game.players, playerID);
-    console.log("Validation!");
-    console.log(player);
-    console.log(game.map.territories[sourceterritory - 1].player);
-    console.log(game.map.territories[targetterritory - 1].player);
-    console.log(game.map.territories[sourceterritory - 1].troops);
     if ((player == false) 
         || (game.map.territories[sourceterritory - 1].player != player.id || 
             game.map.territories[targetterritory - 1].player != player.id) 
