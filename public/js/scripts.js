@@ -9,7 +9,7 @@ colors[3] = "green";
 
 var currentPlayers = 0;
 var clickCount = 0;
-var reinforceTroops, sourceTerritory, sourceID, destID, upLimit;
+var reinforceTroops, attackTroops, sourceTerritory, sourceID, destID, upLimit;
 socket.on('welcome', function(msg){
     $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
 });
@@ -30,7 +30,7 @@ function territoryClicked(name, id) {
     	//only allow me to draft when I have draft-amount > 0 - done
     	 //while $('#draft-amount').text() > 0 - done
     	//Don't let me reduce my troop count more than prexisting - ?
-    	if(game.territories[(id-1)].player == game.currentPlayer) {
+    	if(game.territories[id-1].player == game.currentPlayer) {
     		if(parseInt(document.getElementById('draft-amount').textContent) > 0) {
         		deploy(name);
         	}
@@ -42,10 +42,35 @@ function territoryClicked(name, id) {
     		alert("CLick on your own territory");	//click on your territory
     	}
 
-    } else if (game.currentPhase == "attack") {
-        //attack model
-    } else if (game.currentPhase == "fortify") {
-    	if(game.territories[(id-1)].player == game.currentPlayer) {
+    } 
+    else if (game.currentPhase == "attack") {
+    	clickCount++;
+    	if(clickCount == 1) {
+        	if(game.territories[id-1].player == game.currentPlayer) {
+				sourceTerritoryText = document.getElementById(name+"Text");
+				sourceID = id;
+				attackTroops = parseInt(document.getElementById(name+"Text").textContent) - 1;
+				//ask user to click again
+				$('#attackTextAdditional').show();
+			}
+			else {
+				alert("Select your own territory");
+			}
+		}
+		else if(clickCount == 2) {
+			if(game.territories[id-1].player != game.currentPlayer) {
+				destID = id;
+				$('#attackTextAdditional').hide();
+	        	attack(name, attackTroops, sourceTerritoryText, sourceID, destID);
+	        }
+	        else {
+	        	alert("Select an enemy territory")
+	        }
+	    }
+	    clickCount = 0;
+	}
+    else if (game.currentPhase == "fortify") {
+    	if(game.territories[id-1].player == game.currentPlayer) {
 	    	clickCount++;
 	    	//Have them click again - done
 	    	//Get their second click and call the next function on that second selection? - done
@@ -56,7 +81,6 @@ function territoryClicked(name, id) {
 				sourceTerritoryText = document.getElementById(name+"Text");
 				sourceID = id;
 				reinforceTroops = parseInt(document.getElementById(name+"Text").textContent) - 1;
-				console.log(sourceTerritoryText+" "+reinforceTroops);
 				//ask user to click again
 				$('#fortifyTextAdditional').show();
 			}
@@ -85,20 +109,20 @@ function deploy(name) {
     modal.style.display = "block";
     ///Hides when you click Deploy button
     document.getElementById('deploy').onclick = function() {
-            document.getElementById('deployModal').style.display = "none";
-            var deployed = document.getElementById('deployValue').value;
-            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('deployValue').value);
-            document.getElementById('draft-amount').textContent = parseInt(document.getElementById('draft-amount').textContent) - parseInt(document.getElementById('deployValue').value);
-        	
-        	var body = {};
-        	body.playerid = parseInt(game.currentPlayer);
-        	body.territory = parseInt(document.getElementsByName(name)[0].id);
-        	body.amount = deployed;
-        	body.type = "DraftMove";
-        	console.log(body);
-        	sendEvent(body);
-        }
-        //Hides model when you click away or click the close button
+        document.getElementById('deployModal').style.display = "none";
+        var deployed = document.getElementById('deployValue').value;
+        document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('deployValue').value);
+        document.getElementById('draft-amount').textContent = parseInt(document.getElementById('draft-amount').textContent) - parseInt(document.getElementById('deployValue').value);
+    	
+    	var body = {};
+    	body.playerid = parseInt(game.currentPlayer);
+    	body.territory = parseInt(document.getElementsByName(name)[0].id);
+    	body.amount = deployed;
+    	body.type = "DraftMove";
+    	console.log(body);
+    	sendEvent(body);
+    }
+    //Hides model when you click away or click the close button
     document.getElementsByClassName("close")[0].onclick = function() {
         modal.style.display = "none";
     }
@@ -121,12 +145,12 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
 	    modal.style.display = "block";
 	    ///Hides when you click Deploy button
 	    document.getElementById('reinforce').onclick = function() {
-	            document.getElementById('reinforceModal').style.display = "none";
-	            console.log("Reinforced " + document.getElementById('reinforceValue').value + " in " + name);
-	            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('reinforceValue').value);
-	        	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('reinforceValue').value);
-	        }
-	        //Hides model when you click away or click the close button
+            document.getElementById('reinforceModal').style.display = "none";
+            console.log("Reinforced " + document.getElementById('reinforceValue').value + " in " + name);
+            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('reinforceValue').value);
+        	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('reinforceValue').value);
+        }
+        //Hides model when you click away or click the close button
 	    document.getElementsByClassName("close")[1].onclick = function() {
 	        modal.style.display = "none";
 	    }
@@ -138,6 +162,38 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
 	}
 	else {
 		alert("Please select an adjacent territory");
+	}
+}
+
+function attack(name, attackTroops, sourceTerritoryText, sourceID, destID) {
+	if(attackTroops <= 0) {
+		alert("No troops to attack")
+	}
+	else if(game.territories[sourceID-1].ajacent.indexOf(destID) >= 0) {
+		console.log(name+" "+sourceTerritoryText+" "+attackTroops);
+	    //Assigns the current value to the input, or zero if it isn't set
+	    document.getElementById('attackValue').value = upLimit = attackTroops;
+	    var modal = document.getElementById('attackModal');
+	    modal.style.display = "block";
+	    ///Hides when you click Deploy button
+	    document.getElementById('attack').onclick = function() {
+            document.getElementById('attackModal').style.display = "none";
+            console.log("Attacked with" + document.getElementById('attackValue').value + " troops against " + name);
+            document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) - parseInt(document.getElementById('attackValue').value);
+        	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('attackValue').value);
+        }
+        //Hides model when you click away or click the close button
+	    document.getElementsByClassName("close")[2].onclick = function() {
+	        modal.style.display = "none";
+	    }
+	    window.onclick = function(event) {
+	        if (event.target == modal) {
+	            modal.style.display = "none";
+	        }
+	    }
+	}
+	else {
+		alert("Please select an enemy territory");
 	}
 }
 
