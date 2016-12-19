@@ -15,7 +15,7 @@ var games = [];
 //Giving territory 2, 6 troops
 //map.addTroops(2, 6);
 //We can determine if the territory is ajacent to another territory
-//console.log(map.isAjacent(2, 1));
+//console.log(map.isAdjacent(2, 1));
 //And we can also count how many territories someone has
 //console.log(map.territoriesOwned(1));
 
@@ -279,50 +279,68 @@ function initTerritories(game) {
     }
 }
 
-
 function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops, playerID) {
-
     var game = games[gameID];
 
     //attacking verifications:
 
     //attacking player owns source territory
-    if(game.map.territories[attackingTerritory - 1].player != playerID) return false;
+    if (game.map.territories[attackingTerritory - 1].player != playerID) {
+        return false;
+    }
 
     //attack player doesn’t own target territory
-    if(game.map.territories[defendingTerritory - 1].player == playerID) return false;
+    if (game.map.territories[defendingTerritory - 1].player == playerID) {
+        return false;
+    }
 
     //source territory is adjacent to target territory
-    if(!game.map.isAjacent(attackingTerritory, defendingTerritory)) return false;
+    if (!game.map.isAdjacent(attackingTerritory, defendingTerritory)) {
+        return false;
+    }
 
-    //attack amount is >= source territory troop amount + 1
-    if(attackingTroops >= game.map.territories[attackingTerritory - 1].troops + 1) return false;
+    //attack amount is >= source territory troop amount
+    if (attackingTroops >= game.map.territories[attackingTerritory - 1].troops) {
+        return false;
+    }
 
-    var defendingTroops = game.map.territories[defendingTerritory - 1].troops;
+    if (attackingTroops == 0 || game.map.territories[attackingTerritory - 1].player == 0) {
+        return false;
+    }
 
-    do {
-      //results = array containing num of remaining troops in territories
-      var result = simulate(attackingTroops, game.map.territories[defendingTerritory - 1].troops);
-      attackingTroops = attackingTroops - result[0]; //attackingTroops in result[0]
-      defendingTroops = defendingTroops - result[1]; //defendingTroops in result[1]
+    var attackers = attackingTroops;
+    game.map.territories[attackingTerritory - 1].troops -= attackers;
+    var defenders = game.map.territories[defendingTerritory - 1].troops;
+    var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
+    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory].player).name;
+    var AttackTerritoryName = game.map.territories[attackingTerritory - 1].name;
+    var DefendTerritoryName = game.map.territories[defendingTerritory - 1].name;
 
-      game.map.addTroops(attackingTerritory, attackingTroops - game.map.territories[attackingTerritory - 1].troops);
-      game.map.addTroops(defendingTerritory, defendingTroops - game.map.territories[defendingTerritory - 1].troops);
-    } while(attackingTroops > 1 & defendingTroops > 0);
+    console.log("Attacking " + attackers + " Defending " + defenders);
+
+
+    while (attackers > 0 && defenders > 0) {
+        var result = simulate(attackers, defenders);
+        attackers = result[0];
+        defenders = result[1];
+        console.log("AfterBattle: Attackers " + attackers + " Defending " + defenders);
+    }
+
+    if (defenders == 0) {
+        game.map.setPlayer(playerID, defendingTerritory);
+        game.map.territories[defendingTerritory - 1].troops = attackers;
+        io.emit('chat message', AttackTerritoryName + ' (' + AttackerName + ') has attacked ' + DefendTerritoryName + ' (' + DefenderName + ') and taken the territory!');
+    } else {
+        game.map.territories[defendingTerritory - 1].troops = defenders;
+        io.emit('chat message', AttackTerritoryName + ' (' + AttackerName + ') has attacked ' + DefendTerritoryName + ' (' + DefenderName + ') and was defeated!');
+    }
+
+    console.log("Attacking territory " + game.map.territories[attackingTerritory - 1].troops);
+    console.log("Defending territory " + game.map.territories[defendingTerritory - 1].troops);
 
     var gameEvent = new Event(gameID, 'Battle Result');
     gameEvent.player = game.currentPlayer;
-    var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
-    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory].player).name;
-
-    if(defendingTroops == 0) {
-      io.emit('chat message', AttackerName + ' has defeated ' + DefenderName);
-      io.emit('Attack', gameEvent);
-
-    } else {
-      io.emit('chat message', AttackerName + ' has lost to ' + DefenderName);
-      io.emit('Attack Phase Start', gameEvent);
-    }
+    io.emit('Battle Result', gameEvent);
 
     return true;
 
@@ -545,32 +563,21 @@ function diceRoll() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
-function fortify(gameID, playerID, sourceterritory, targetterritory, amount){
+function fortify(gameID, playerID, sourceterritory, targetterritory, amount) {
     var game = games[gameID];
     var player = getPlayerByID(game.players, playerID);
-<<<<<<< HEAD
-    if ((player == false) 
-        || (game.map.territories[sourceterritory - 1].player != player.id || 
-            game.map.territories[targetterritory - 1].player != player.id) 
-=======
-    console.log("Validation!");
-    console.log(player);
-    console.log(game.map.territories[sourceterritory - 1].player);
-    console.log(game.map.territories[targetterritory - 1].player);
-    console.log(game.map.territories[sourceterritory - 1].troops);
-    if ((player == false)
-        || (game.map.territories[sourceterritory - 1].player != player.id ||
-            game.map.territories[targetterritory - 1].player != player.id)
->>>>>>> 842bdaefc12c787670809956ac54291fe9cc4a53
-        || (game.map.territories[sourceterritory - 1].troops <= amount)){
+    if ((player == false) ||
+        (game.map.territories[sourceterritory - 1].player != player.id ||
+            game.map.territories[targetterritory - 1].player != player.id) ||
+        (game.map.territories[sourceterritory - 1].troops <= amount)) {
         console.log("Failed validation");
         return false;
     }
     game.map.addTroops(sourceterritory, amount * -1);
     game.map.addTroops(targetterritory, amount);
 
-    io.emit('chat message', player.name + ' has moved ' + amount + ' troops from '
-        + game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
+    io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' +
+        game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
     endPhase(gameID);
 }
 

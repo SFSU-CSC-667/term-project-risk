@@ -140,7 +140,7 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
 	if(reinforceTroops <= 0) {
 		alert("No troops to reinforce")
 	}
-	else if(game.territories[sourceID-1].ajacent.indexOf(destID) >= 0) {
+	else if(game.territories[sourceID-1].adjacent.indexOf(destID) >= 0) {
 		console.log(name+" "+sourceTerritoryText+" "+reinforceTroops);
 	    //Assigns the current value to the input, or zero if it isn't set
 	    document.getElementById('reinforceValue').value = upLimit = reinforceTroops;
@@ -181,7 +181,7 @@ function attack(name, attackTroops, sourceTerritoryText, sourceID, destID) {
 	if(attackTroops <= 0) {
 		alert("No troops to attack")
 	}
-	else if(game.territories[sourceID-1].ajacent.indexOf(destID) >= 0) {
+	else if(game.territories[sourceID-1].adjacent.indexOf(destID) >= 0) {
 		console.log(name+" "+sourceTerritoryText+" "+attackTroops);
 	    //Assigns the current value to the input, or zero if it isn't set
 	    document.getElementById('attackValue').value = upLimit = attackTroops;
@@ -196,8 +196,8 @@ function attack(name, attackTroops, sourceTerritoryText, sourceID, destID) {
         
         	var body = {};
 	    	body.playerid = parseInt(game.currentPlayer);
-	    	body.targetterritory = sourceID;
-	    	body.sourceterritory = destID;
+	    	body.targetterritory = destID;
+	    	body.sourceterritory = sourceID;
 	    	body.amount = parseInt(document.getElementById('attackValue').value);
 	    	body.type = "Attack";
 	    	console.log(body);
@@ -325,6 +325,7 @@ function updateMap() {
     $.get(
         "/game/" + game.id + "/territories",
         function(data) {
+        	console.log(data);
             drawMap(data);
         }
     );
@@ -398,6 +399,9 @@ socket.on('Game Starting', function(event) {
         $("#waitingText").show();
     }
 }).on('Draft Move', function(event) {
+	updateGame();
+	updateMap();
+}).on('Battle Result', function(event) {
 	updateGame();
 	updateMap();
 });
