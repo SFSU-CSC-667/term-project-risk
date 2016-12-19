@@ -305,7 +305,10 @@ function endGame(gameID) {
 function calculateDraft(res, gameID, player) {
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
-        if (game.currentDraftCount != -1) res.json(game.currentDraftCount);
+        if (game.currentDraftCount != -1) {
+            res.json(game.currentDraftCount);
+            return;
+        }
         var totalTerritories = game.map.territoriesOwned(player);
         var result = Math.floor(totalTerritories / 3);
 
@@ -313,8 +316,74 @@ function calculateDraft(res, gameID, player) {
             result = 3;
         }
 
+        /*
+        Continent Bonuses:
+        North America: 5, 1-9
+        South America: 2, 10-13
+        Africa: 3, 14-19 
+        Europe: 5, 20-26
+        Asia: 7, 27-38
+        Australia: 2, 39 - 42
+        */
+
+        // North America
+        var naBonus = true;
+        for (i = 0; i < 9; i++){
+            if (game.map.territories[i].player != player){
+                naBonus = false;
+                break;
+            }
+        }
+        if (naBonus) result += 5;
+
+        var saBonus = true;
+        for (i = 9; i < 13; i++){
+            if (game.map.territories[i].player != player){
+                saBonus = false;
+                break;
+            }
+        }
+        if (saBonus) result += 2;
+
+        var afBonus = true;
+        for (i = 13; i < 19; i++){
+            if (game.map.territories[i].player != player){
+                afBonus = false;
+                break;
+            }
+        }
+        if (afBonus) result += 3;
+
+        var euBonus = true;
+        for (i = 19; i < 26; i++){
+            if (game.map.territories[i].player != player){
+                euBonus = false;
+                break;
+            }
+        }
+        if (euBonus) result += 5;
+
+        var asBonus = true;
+        for (i = 26; i < 38; i++){
+            if (game.map.territories[i].player != player){
+                asBonus = false;
+                break;
+            }
+        }
+        if (asBonus) result += 7;
+
+        var auBonus = true;
+        for (i = 38; i < 42; i++){
+            if (game.map.territories[i].player != player){
+                asBonus = false;
+                break;
+            }
+        }
+        if (auBonus) result += 2;
+
         game.currentDraftCount = result;
         updateGame(game).then(function(data) {
+            sendChatMessage(game.id, getPlayerByID(game.players, player).name + ' received ' + result + ' troops in the draft');
             res.json(result);
         });
     });

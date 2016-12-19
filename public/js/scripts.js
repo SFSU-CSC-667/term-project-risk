@@ -535,6 +535,9 @@ jQuery(document).ready(function() {
         }
         socket.emit('chat message', msgobj);
         $('#text').val('');
+        $('#messages').animate({
+                   scrollTop: $("#messages li").last().offset().top
+               }, 1000);
         return false;
     };
 
