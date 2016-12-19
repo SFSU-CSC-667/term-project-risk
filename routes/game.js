@@ -186,22 +186,7 @@ function removePlayer(gameID, player) {
     return true;
 }
 
-<<<<<<< d2f6a3cabef7d4d7ba19d80eb3108fc764ac2276
-function draft(gameID, playerid, territory, amount) {
-    var game = games[gameID];
-    var player;
-    for (i = 0; i < game.players.length; i++) {
-        if (game.players[i].id == playerid) {
-            player = game.players[i];
-            break;
-=======
-
-function startTurn(gameID) {
-
-}
-
 function draft(res, gameID, playerid, territory, amount) {
-    res.send()
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
         var player;
@@ -210,7 +195,7 @@ function draft(res, gameID, playerid, territory, amount) {
                 player = game.players[i];
                 break;
             }
->>>>>>> paritally working database
+
         }
         if (player == null) return false;
 
@@ -359,7 +344,6 @@ function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops,
     //attacking verifications:
 
     //attacking player owns source territory
-<<<<<<< d2f6a3cabef7d4d7ba19d80eb3108fc764ac2276
     if (game.map.territories[attackingTerritory - 1].player != playerID) {
         return false;
     }
@@ -382,24 +366,12 @@ function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops,
     if (attackingTroops == 0 || game.map.territories[attackingTerritory - 1].player == 0) {
         return false;
     }
-=======
-    if (game.map.territories[attackingTerritory].player != playerID) return false;
-
-    //attack player doesn’t own target territory
-    if (game.map.territories[defendingTerritory].player == playerID) return false;
-
-    //source territory is adjacent to target territory
-    if (!game.map.isAjacent(attackingTerritory, defendingTerritory)) return false;
-
-    //attack amount is >= source territory troop amount + 1
-    if (attackingTroops >= game.map.territories[attackingTerritory].troops) return false;
->>>>>>> paritally working database
 
     var attackers = attackingTroops;
     game.map.territories[attackingTerritory - 1].troops -= attackers;
     var defenders = game.map.territories[defendingTerritory - 1].troops;
     var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
-    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory-1].player).name;
+    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory - 1].player).name;
     var AttackTerritoryName = game.map.territories[attackingTerritory - 1].name;
     var DefendTerritoryName = game.map.territories[defendingTerritory - 1].name;
 
@@ -627,13 +599,8 @@ function fortify(gameID, playerID, sourceterritory, targetterritory, amount) {
         console.log("Failed validation");
         return false;
     }
-<<<<<<< d2f6a3cabef7d4d7ba19d80eb3108fc764ac2276
     game.map.territories[sourceterritory - 1].troops -= parseInt(amount);
     game.map.territories[targetterritory - 1].troops += parseInt(amount);
-=======
-    game.map.addTroops(sourceterritory, amount * -1);
-    game.map.addTroops(targetterritory, amount);
->>>>>>> paritally working database
 
     io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' +
         game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);

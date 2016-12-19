@@ -109,9 +109,9 @@ function deploy(name) {
             console.log(body);
             sendEvent(body);
 
-            if (parseInt(document.getElementById('draft-amount').textContent) == 0) {
+            /*if (parseInt(document.getElementById('draft-amount').textContent) == 0) {
                 endPhase();
-            }
+            }*/
         }
         //Hides model when you click away or click the close button
     document.getElementsByClassName("close")[0].onclick = function() {
