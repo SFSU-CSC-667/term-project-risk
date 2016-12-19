@@ -14,7 +14,9 @@ socket.on('welcome', function(msg) {
     $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
 });
 socket.on('chat message', function(msg) {
-    $('#messages').append($('<li>').text(msg));
+	if(msg.gameid == $('#gameid').val()){
+    	$('#messages').append($('<li>').text(msg.message));
+	}
 });
 
 function territoryClicked(name, id) {
@@ -431,6 +433,15 @@ jQuery(document).ready(function() {
             initGame(data);
         }
     );
+    //Get old chats
+    $.get(
+        "/game/" + $('#gameid').val() + "/chat",
+        function(data) {
+            if (data != false) {
+            	for (i = 0; i < data.length; i++) $('#messages').append($('<li>').text(data[i].message));
+            }
+        }
+    );
 
     // This button will increment the value
     $('.qtyplus').click(function(e) {
@@ -490,7 +501,10 @@ jQuery(document).ready(function() {
         }
     });
     document.getElementById('sendButton').onclick = function() {
-        socket.emit('chat message', $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val());
+    	var msgobj = {};
+    	msgobj.gameid = $('#gameid').val();
+    	msgobj.message = $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val();
+        socket.emit('chat message', msgobj);
         $('#text').val('');
         return false;
     };
