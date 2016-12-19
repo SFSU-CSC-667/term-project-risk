@@ -73,8 +73,8 @@
               <div id="setupText" class="hidden"> Currently waiting for other players to join the game. The game will begin automatically when there are four players. </div>
               <div id="draftText" class="hidden"> You may draft <span id="draft-amount"></span> units this turn. Please click on the map to place them. 
                 <br> <button type="button" class="btn btn-danger" onclick="endPhase();">End Phase</button></div>
-              <div id="attackText" class="hidden"> You may now attack! Please click on the territory you want to attack from, then an adjacent territory you are attacking. <br> <button type="button" class="btn btn-danger" onclick="endPhase();">End Phase</button></div>
-              <div id="fortifyText" class="hidden"> You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into. <br> <div id="fortifyTextAdditional" class="hidden"> Please select a neighbouring terrirtory to reinforce troops </div> <button type="button" class="btn btn-danger" onclick="endPhase();">End Turn</button></div>
+              <div id="attackText" class="hidden"> You may now attack! Please click on the territory you want to attack from, then an adjacent territory you are attacking. <br> <div id="attackTextAdditional" class="hidden"> Please select an enemy territory to attack </div> <button type="button" class="btn btn-danger" onclick="endPhase();">End Phase</button></div>
+              <div id="fortifyText" class="hidden"> You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into. <br> <div id="fortifyTextAdditional" class="hidden"> Please select a neighbouring territory to reinforce troops </div> <button type="button" class="btn btn-danger">End Turn</button></div>
 
               <div id="waitingText" class="hidden"> It is not your turn yet. </div>
 
@@ -164,6 +164,21 @@
                     <input readonly type='text' id="reinforceValue" name='quantity' value='0' class='qty' />
                     <input type='button' value='+' class='qtyplus' field='quantity' /><br><br>
                     <input type='button' id="reinforce" value='Reinforce' class='button' />
+                </form>
+                </div>
+
+              </div>
+
+              <div id="attackModal" class="modal">
+
+                <!-- Modal content -->
+                <div class="modal-content">
+                  <span class="close">×</span>
+                  <form id='myform' method='POST' action='#'>
+                    <input type='button' value='-' class='qtyminus' field='quantity' />
+                    <input readonly type='text' id="attackValue" name='quantity' value='0' class='qty' />
+                    <input type='button' value='+' class='qtyplus' field='quantity' /><br><br>
+                    <input type='button' id="attack" value='Attack' class='button' />
                 </form>
                 </div>
 
