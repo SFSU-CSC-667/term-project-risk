@@ -3,8 +3,9 @@ var world = require("./map.js");
 var io = require('../app');
 var Event = require('./event.js');
 var pgp = require('pg-promise')();
-//TODO CONFIGURE POSTGRES
+//process.env.DATABASE_URL on heroku
 var db = pgp('postgres://localhost:5432/risk');
+createTables();
 var router = express.Router();
 var maxGameID = 0;
 var games = [];
@@ -16,6 +17,13 @@ io.on('connection', function(socket) {
         sendChatMessage(object.gameid, object.message);
     });
 });
+
+
+function createTables() {
+    db.any("CREATE TABLE game (id integer NOT NULL, players text, currentPlayer bigint, currentPhase varchar(10),"
+     + "currentDraftCount int, territories text);");
+    db.any("CREATE TABLE chat (gameid integer NOT NULL, message text);");
+}
 
 function getChatMessages(gameID) {
     return db.any("select * from chat where gameid = $1", gameID);
