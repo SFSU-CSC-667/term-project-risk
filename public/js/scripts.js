@@ -307,7 +307,7 @@ function updateMap() {
     $.get(
         "/game/" + game.id + "/territories",
         function(data) {
-            drawMap(data.territories);
+            drawMap(data);
         }
     );
 }
@@ -346,8 +346,7 @@ socket.on('Game Starting', function(event) {
     }
 }).on('Attack Phase Start', function(event) {
 	updateGame();
-	console.log(event);
-	console.log(localStorage.getItem("userID"));
+	updateMap();
     if (event.player == localStorage.getItem("userID")) {
         startAttack(event.player, event.game);
     } else {
@@ -355,10 +354,29 @@ socket.on('Game Starting', function(event) {
     }
 }).on('Fortify Phase Start', function(event) {
 	updateGame();
+	updateMap();
+    if (event.player == localStorage.getItem("userID")) {
+        startFortify(event.player, event.game);
+    } else {
+        $("#waitingText").show();
+    }
+}).on('End Turn', function(event) {
+	updateGame();
+	updateMap();
+    if (event.player == localStorage.getItem("userID")) {
+		$('#fortifypill').removeClass("active").addClass('disabled');
+		$('#fortifyText').hide();
+		$("#waitingText").show();
+    } else {
+        $("#waitingText").show();
+    }
+}).on('Start Turn', function(event) {
+	updateGame();
+	updateMap();
 	console.log(event);
 	console.log(localStorage.getItem("userID"));
     if (event.player == localStorage.getItem("userID")) {
-        startFortify(event.player, event.game);
+		startDraft(event.currentPlayer, event.game);
     } else {
         $("#waitingText").show();
     }
