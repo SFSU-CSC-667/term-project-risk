@@ -12,10 +12,16 @@ var clickCount = 0;
 var reinforceTroops, attackTroops, sourceTerritory, sourceID, destID, upLimit;
 socket.on('welcome', function(msg) {
     $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
+    $('#messages').animate({
+        scrollTop: 10000
+    }, 1000);
 });
 socket.on('chat message', function(msg) {
     if (msg.gameid == $('#gameid').val()) {
         $('#messages').append($('<li>').text(msg.message));
+        $('#messages').animate({
+            scrollTop: 10000
+        }, 1000);
     }
 });
 
@@ -535,9 +541,6 @@ jQuery(document).ready(function() {
         }
         socket.emit('chat message', msgobj);
         $('#text').val('');
-        $('#messages').animate({
-                   scrollTop: $("#messages li").last().offset().top
-               }, 1000);
         return false;
     };
 
