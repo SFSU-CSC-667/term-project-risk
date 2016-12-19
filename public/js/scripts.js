@@ -55,10 +55,13 @@ function territoryClicked(name, id) {
 				document.getElementById('fortifyText').textContent = "Please select a neighbouring terrirtory to reinforce troops";
 			}
 			else if(clickCount == 2) {
-				clickCount = 0;
 				destID = id;
 				document.getElementById('fortifyText').textContent = "You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into.";
 	        	reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID);
+	        	clickCount = 3;
+	        }
+	        else {
+	        	alert("You can only reinforce once");		//End of phase
 	        }
 	    }
 	    else {
@@ -287,9 +290,23 @@ jQuery(document).ready(function() {
         // Get the field name
         fieldName = $(this).attr('field');
         // Get its current value
-        currentVal = parseInt($('input[name=' + fieldName + ']').val());
-        // If is not undefined
-        if(upLimit != undefined) {
+        if(game.currentPhase == "draft") {
+        	currentVal = parseInt($('#deployValue').val());
+        	// If is not undefined
+        	if(!isNaN(currentVal)&&currentVal < upLimit) {
+            	// Increment
+            	$('#deployValue').val(currentVal + 1);
+        	} 
+        }
+        else if (game.currentPhase == "fortify") {
+        	currentVal = parseInt($('#reinforceValue').val());
+        	if(!isNaN(currentVal)&&currentVal < upLimit) {
+            	// Increment
+            	$('#reinforceValue').val(currentVal + 1);
+        	} 
+        }
+        
+        /*if(upLimit != undefined) {
         	if(!isNaN(currentVal)&&currentVal < upLimit) {
             // Increment
             $('input[name=' + fieldName + ']').val(currentVal + 1);
@@ -300,7 +317,7 @@ jQuery(document).ready(function() {
             // Increment
             $('input[name=' + fieldName + ']').val(currentVal + 1);
         	} 
-        }
+        }*/
         
     });
     // This button will decrement the value till 0
@@ -310,11 +327,20 @@ jQuery(document).ready(function() {
         // Get the field name
         fieldName = $(this).attr('field');
         // Get its current value
-        currentVal = parseInt($('input[name=' + fieldName + ']').val());
-        // If it isn't undefined or its greater than 0
-        if(!isNaN(currentVal) && currentVal > 0) {
-            // Decrement one
-            $('input[name=' + fieldName + ']').val(currentVal - 1);
+		if(game.currentPhase == "draft") {
+        	currentVal = parseInt($('#deployValue').val());
+        	// If is not undefined
+        	if(!isNaN(currentVal)&&currentVal > 0) {
+            	// Increment
+            	$('#deployValue').val(currentVal - 1);
+        	} 
+        }
+        else if (game.currentPhase == "fortify") {
+        	currentVal = parseInt($('#reinforceValue').val());
+        	if(!isNaN(currentVal)&&currentVal > 0) {
+            	// Increment
+            	$('#reinforceValue').val(currentVal - 1);
+        	} 
         }
     });
     document.getElementById('sendButton').onclick = function() {
