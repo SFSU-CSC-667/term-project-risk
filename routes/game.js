@@ -6,19 +6,6 @@ var router = express.Router();
 var maxGameID = 0;
 var games = [];
 
-//This creates a new game map with our gameid. No players are assigend to this map
-//var map = new world.Map("1");
-//You can give players control of a territory using it's ID
-//Giving playerid 1 control of territory 2
-//map.setPlayer(1, 2);
-//Let's add some troops to his territory
-//Giving territory 2, 6 troops
-//map.addTroops(2, 6);
-//We can determine if the territory is ajacent to another territory
-//console.log(map.isAdjacent(2, 1));
-//And we can also count how many territories someone has
-//console.log(map.territoriesOwned(1));
-
 // Socket stuff
 io.on('connection', function(socket) {
     io.to(socket.id).emit('welcome', 'Welcome to the game!');
@@ -83,7 +70,7 @@ function addPlayer(gameID, player) {
         //TODO: Need some validation on the player object
         game.players.push(player);
         //TEST CODE
-        /*if (game.players.length == 1) {
+        if (game.players.length == 1) {
             playerone = {
                 id: 1,
                 game: 0,
@@ -102,7 +89,7 @@ function addPlayer(gameID, player) {
                 name: 'Paper Boi'
             };
             game.players.push(playerthree);
-        }*/
+        }
 
         if (game.players.length >= 4) {
             startGame(gameID);
@@ -133,11 +120,6 @@ function removePlayer(gameID, player) {
     gameEvent.player = player;
 
     return true;
-}
-
-
-function startTurn(gameID) {
-
 }
 
 function draft(gameID, playerid, territory, amount) {
@@ -312,7 +294,7 @@ function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops,
     game.map.territories[attackingTerritory - 1].troops -= attackers;
     var defenders = game.map.territories[defendingTerritory - 1].troops;
     var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
-    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory].player).name;
+    var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory-1].player).name;
     var AttackTerritoryName = game.map.territories[attackingTerritory - 1].name;
     var DefendTerritoryName = game.map.territories[defendingTerritory - 1].name;
 
@@ -391,11 +373,6 @@ function attacking1v1(attackingTroops, defendingTroops) {
     var attack = diceRoll();
     var defense = diceRoll();
 
-    //Push Rolls to Socket
-
-    //console.log('Attacking Die: '+attack.toString());
-    //console.log('Defending Die: '+defense.toString());
-
     if (attack > defense) --result[1]; //Attacker wins
 
     else --result[0]; //Defender wins
@@ -412,12 +389,6 @@ function attacking1v2(attackingTroops, defendingTroops) {
     defense.sort(function(a, b) {
         return b - a
     });
-
-    //Push Rolls to Socket
-
-    //console.log('Attacking Die: '+attack.toString());
-    //console.log('Defending Dice: '+defense.toString());
-
     if (attack > defense[0]) --result[1];
 
     else --result[0];
@@ -434,11 +405,6 @@ function attacking2v1(attackingTroops, defendingTroops) {
     attack.sort(function(a, b) {
         return b - a
     });
-
-    //Push Rolls to Socket
-
-    //console.log('Attacking Dice: '+attack.toString());
-    //console.log('Defending Die: '+defense.toString());
 
     if (attack[0] > defense) --result[1];
 
@@ -459,11 +425,6 @@ function attacking2v2(attackingTroops, defendingTroops) {
     defense.sort(function(a, b) {
         return b - a
     });
-
-    //Push Rolls to Socket
-
-    //console.log('Attacking Dice: '+attack.toString());
-    //console.log('Defending Dice: '+defense.toString());
 
     //Compares highest die
     if (attack[0] > defense[0]) {
@@ -501,11 +462,6 @@ function attacking3v1(attackingTroops, defendingTroops) {
         return b - a
     });
 
-    //Push Rolls to Socket
-
-    //console.log('Attacking Dice: '+attack.toString());
-    //console.log('Defending Die: '+defense.toString());
-
     if (attack[0] > defense) --result[1];
 
     else --result[0];
@@ -526,11 +482,6 @@ function attacking3v2(attackingTroops, defendingTroops) {
         return b - a
     });
 
-    //Push Rolls to Socket
-
-    //console.log('Attacking Dice: '+attack.toString());
-    //console.log('Defending Dice: '+defense.toString());
-
     //Compares highest die
     if (attack[0] > defense[0]) {
         --result[1];
@@ -541,8 +492,6 @@ function attacking3v2(attackingTroops, defendingTroops) {
         } else {
             --result[0];
         }
-
-        //return result;
 
     } else {
         --result[0];
@@ -573,8 +522,8 @@ function fortify(gameID, playerID, sourceterritory, targetterritory, amount) {
         console.log("Failed validation");
         return false;
     }
-    game.map.addTroops(sourceterritory, amount * -1);
-    game.map.addTroops(targetterritory, amount);
+    game.map.territories[sourceterritory - 1].troops -= parseInt(amount);
+    game.map.territories[targetterritory - 1].troops += parseInt(amount);
 
     io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' +
         game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
@@ -617,15 +566,6 @@ router.get('/:id', function(req, res, next) {
     res.render('game', {
         gameid: req.params.id
     });
-    //Eventually the code will work like this
-    /*
-    game = games[req.params.id];
-    if (game != null) {
-      res.render('game', { gameState: game });
-    } else {
-      res.render('index', { title: 'Create a game!' });
-    }
-    */
 });
 
 router.post('/events', function(req, res, next) {
@@ -648,14 +588,6 @@ router.post('/events', function(req, res, next) {
             break;
         case "Attack":
             res.send(attack(req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.playerid));
-            break;
-        case "BattleResult":
-            //not implemented
-            //res.send();
-            break;
-        case "BattleVictory":
-            //not implemented
-            //res.send();
             break;
         case "Fortify":
             res.send(fortify(req.body.gameid, req.body.playerid, req.body.sourceterritory, req.body.targetterritory, req.body.amount));

@@ -304,7 +304,7 @@ this.Map = function(gameid) {
         this.territories[territoryID-1].player = playerID;
     };
     this.addTroops = function(territoryID, amount) {
-    	//This also works with negatives!
+    	//This also works with negatives
     	this.territories[territoryID-1].troops += parseInt(amount);
 
     }

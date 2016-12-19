@@ -74,12 +74,7 @@ function territoryClicked(name, id) {
 	}
     else if (game.currentPhase == "fortify") {
     	if(game.territories[id-1].player == game.currentPlayer) {
-	    	clickCount++;
-	    	//Have them click again - done
-	    	//Get their second click and call the next function on that second selection? - done
-			//Click a source territory and a target territory - done
-			//Enter an amount of troops to transfer to the new territory - done
-			//THERE MUST BE AT LEAST ONE TROOP REMAINING IN THE SOURCE TERRITORY - done
+    		clickCount++;
 			if(clickCount == 1) {
 				sourceTerritoryText = document.getElementById(name+"Text");
 				sourceID = id;
@@ -91,15 +86,13 @@ function territoryClicked(name, id) {
 				destID = id;
 				$('#fortifyTextAdditional').hide();
 	        	reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID);
-	        	clickCount = 3;
 	        }
-	        else {
-	        	alert("You can only reinforce once");		//End of phase
-	        }
-	    }
-	    else {
-    		alert("Click on your own territory");	//click on your territory
     	}
+    	else {
+    		alert("Click on your own territory");	//click on your territory
+    		clickCount = 0;
+    	}
+
     }
 }
 
@@ -174,6 +167,7 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
 	}
 	else {
 		alert("Please select an adjacent friendly territory");
+		clickCount = 0;
 	}
 }
 
@@ -365,6 +359,10 @@ socket.on('Game Starting', function(event) {
     } else {
         $("#waitingText").show();
     }
+}).on('Player Joined', function(event) {
+	updateGame();
+    updateMap();
+    addPlayer(event.id, event.name);
 }).on('Attack Phase Start', function(event) {
 	updateGame();
 	updateMap();
