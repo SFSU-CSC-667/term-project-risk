@@ -357,7 +357,7 @@ socket.on('Game Starting', function(event) {
 }).on('Player Joined', function(event) {
     updateGame();
     updateMap();
-    addPlayer(event.id, event.name);
+    addPlayer(event.player.id, event.player.name);
 }).on('Attack Phase Start', function(event) {
     updateGame();
     updateMap();
@@ -503,7 +503,11 @@ jQuery(document).ready(function() {
     document.getElementById('sendButton').onclick = function() {
     	var msgobj = {};
     	msgobj.gameid = $('#gameid').val();
-    	msgobj.message = $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val();
+    	if (localStorage.getItem("userID") == null) {
+    		msgobj.message = 'Spectator: ' + $('#text').val();
+    	} else {
+    		msgobj.message = $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val();
+    	}
         socket.emit('chat message', msgobj);
         $('#text').val('');
         return false;
