@@ -9,6 +9,7 @@ function statusChangeCallback(response) {
     console.log(response);
     if (response.status === 'connected') {
         localStorage.setItem("userID", parseInt(response.authResponse.userID, 10));
+        console.log("Set auth " + parseInt(response.authResponse.userID, 10));
         $('#notLoggedIn').hide();
         $('#loggedIn').show();
     } else {

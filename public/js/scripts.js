@@ -269,6 +269,8 @@ function initGame(gameState) {
     for (i = 0; i < gameState.players.length; i++) {
         addPlayer(gameState.players[i].id, gameState.players[i].name);
     }
+    console.log("currentPlayer " + gameState.currentPlayer);
+    console.log("me " + localStorage.getItem("userID"));
     drawMap(gameState.map.territories);
     game.territories = gameState.map.territories;
     setPlayerActive(gameState.currentPlayer);
