@@ -5,6 +5,7 @@ var Event = require('./event.js');
 var router = express.Router();
 var maxGameID = 0;
 var games = [];
+var playerName;
 
 //This creates a new game map with our gameid. No players are assigend to this map
 //var map = new world.Map("1");
@@ -25,6 +26,8 @@ io.on('connection', function(socket) {
     socket.on('chat message', function(msg) {
         io.emit('chat message', msg);
     });
+
+    io.emit('get name', playerName);
 });
 
 
@@ -66,6 +69,7 @@ function getPlayerByID(players, playerID) {
 function addPlayer(gameID, player) {
     var game = games[gameID];
     console.log(player);
+    playerName = player.name;
     if (game == null) {
         var problem = {};
         problem.type = "error";
