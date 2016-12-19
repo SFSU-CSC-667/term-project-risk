@@ -513,6 +513,35 @@ function diceRoll() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
+function fortify(gameID, playerID, sourceterritory, targetterritory, amount){
+    console.log("fortify fortify fortify fortify ");
+    console.log(gameID);
+    console.log(playerID);
+    console.log(sourceterritory);
+    console.log(targetterritory);
+    console.log(amount);
+    var game = games[gameID];
+    var player = getPlayerByID(game.players, playerID);
+    console.log("Validation!");
+    console.log(player);
+    console.log(game.map.territories[sourceterritory - 1].player);
+    console.log(game.map.territories[targetterritory - 1].player);
+    console.log(game.map.territories[sourceterritory - 1].troops);
+    if ((player == false) 
+        || (game.map.territories[sourceterritory - 1].player != player.id || 
+            game.map.territories[targetterritory - 1].player != player.id) 
+        || (game.map.territories[sourceterritory - 1].troops <= amount)){
+        console.log("Failed validation");
+        return false;
+    } 
+    game.map.addTroops(sourceterritory, amount * -1);
+    game.map.addTroops(targetterritory, amount);
+
+    io.emit('chat message', player.name + ' has moved ' + amount + ' troops from ' 
+        + game.map.territories[sourceterritory - 1].name + ' to ' + game.map.territories[targetterritory - 1].name);
+    endPhase(gameID);
+}
+
 
 /* This file will contain all of the backend game logic */
 router.get('/', function(req, res, next) {
@@ -579,7 +608,7 @@ router.post('/events', function(req, res, next) {
             res.send(draft(req.body.gameid, req.body.playerid, req.body.territory, req.body.amount));
             break;
         case "Attack":
-            res.send(attack(req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.amount));
+            res.send(attack(req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.playerid));
             break;
         case "BattleResult":
             //not implemented
@@ -590,8 +619,7 @@ router.post('/events', function(req, res, next) {
             //res.send();
             break;
         case "Fortify":
-            //not implemented
-            //res.send();
+            res.send(fortify(req.body.gameid, req.body.playerid, req.body.sourceterritory, req.body.targetterritory, req.body.amount));
             break;
         case "PhaseEnd":
             res.send(endPhase(req.body.gameid));

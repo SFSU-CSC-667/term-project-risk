@@ -152,6 +152,15 @@ function reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID)
             console.log("Reinforced " + document.getElementById('reinforceValue').value + " in " + name);
             document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('reinforceValue').value);
         	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('reinforceValue').value);
+        	
+        	var body = {};
+	    	body.playerid = parseInt(game.currentPlayer);
+	    	body.targetterritory = sourceID;
+	    	body.sourceterritory = destID;
+	    	body.amount = parseInt(document.getElementById('reinforceValue').value);
+	    	body.type = "Fortify";
+	    	console.log(body);
+	    	sendEvent(body);
         }
         //Hides model when you click away or click the close button
 	    document.getElementsByClassName("close")[1].onclick = function() {
