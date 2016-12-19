@@ -20,6 +20,10 @@ socket.on('chat message', function(msg){
 function territoryClicked(name, id) {
     console.log(name);
 
+    if(game.currentPlayer != localStorage.getItem("userID")) {
+    	return;
+    }
+
     if (game.currentPhase == "draft") {
     	//Decrease draft-amount span accordingly when drafting- done
     	//only let me deploy/draft on territories I control - done
@@ -54,11 +58,11 @@ function territoryClicked(name, id) {
 				reinforceTroops = parseInt(document.getElementById(name+"Text").textContent) - 1;
 				console.log(sourceTerritoryText+" "+reinforceTroops);
 				//ask user to click again
-				document.getElementById('fortifyText').textContent = "Please select a neighbouring terrirtory to reinforce troops";
+				$('#fortifyTextAdditional').show();
 			}
 			else if(clickCount == 2) {
 				destID = id;
-				document.getElementById('fortifyText').textContent = "You may now foritfy your position. Please click on the territory you want to move troops from, then an adjacent territory to move the troops into.";
+				$('#fortifyTextAdditional').hide();
 	        	reinforce(name, reinforceTroops, sourceTerritoryText, sourceID, destID);
 	        	clickCount = 3;
 	        }
@@ -159,7 +163,7 @@ function draftText(data) {
     $('#draft-amount').text(data);
 }
 
-function initDraft(playerID, gameid) {
+function startDraft(playerID, gameid) {
     var body = {};
     body.playerid = playerID;
     body.gameid = gameid;
@@ -169,9 +173,18 @@ function initDraft(playerID, gameid) {
         body,
         draftText
     );
+}
 
-    //enable tab, show text, calculate draft amount, do draft, end phase, go to attack
-
+function updateGame(){
+	$.get(
+        "/game/" + $('#gameid').val() + "/state",
+        function(data) {
+        	game.territories = data.territories.territories;
+			game.currentPlayer = data.currentPlayer;
+			game.currentPhase = data.currentPhase;
+			game.id = data.id;
+        }
+    );
 }
 
 function initGame(gameState) {
@@ -189,13 +202,11 @@ function initGame(gameState) {
         $("#setupText").show();
     } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
         if (gameState.currentPhase == 'draft') {
-            initDraft(gameState.currentPlayer, gameState.id);
+            startDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
             startAttack(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'fortify') {
-            //Do fortify
-            $('#attackText').hide();
-            $('#fortifyText').show();
+            startFortify(gameState.currentPlayer, gameState.id);
         }
     } else {
         $('#waitingText').show();
@@ -249,7 +260,7 @@ function setPlayerActive(playerID, gameID) {
     $('#player_' + playerID).addClass('active');
 }
 
-function startAttack(playerID) {
+function startAttack(playerID, gameid) {
     $('#waitingText').hide();
     $('#draftText').hide();
     $('#draftpill').removeClass("active").addClass('disabled');
@@ -257,20 +268,38 @@ function startAttack(playerID) {
     $('#attackText').show();
 }
 
+function startFortify(playerID, gameid){
+	$('#waitingText').hide();
+    $('#attackText').hide();
+    $('#attackpill').removeClass("active").addClass('disabled');
+    $('#fortifypill').removeClass("disabled").addClass('active');
+	$('#fortifyText').show();
+}
+
 socket.on('Game Starting', function(event) {
     updateMap();
     setPlayerActive(event.currentPlayer);
     $("#setupText").hide();
     if (Number(localStorage.getItem("userID")) == event.currentPlayer) {
-        startDraft(event.currentPlayer);
+        startDraft(event.currentPlayer, event.game);
     } else {
         $("#waitingText").show();
     }
 }).on('Attack Phase Start', function(event) {
+	updateGame();
 	console.log(event);
 	console.log(localStorage.getItem("userID"));
     if (event.player == localStorage.getItem("userID")) {
         startAttack(event.player, event.game);
+    } else {
+        $("#waitingText").show();
+    }
+}).on('Fortify Phase Start', function(event) {
+	updateGame();
+	console.log(event);
+	console.log(localStorage.getItem("userID"));
+    if (event.player == localStorage.getItem("userID")) {
+        startFortify(event.player, event.game);
     } else {
         $("#waitingText").show();
     }
@@ -301,7 +330,7 @@ jQuery(document).ready(function() {
         		alert("This game does not exist, redirecting you to home.");
         		window.location = "/";
         	}
-            console.log(data);
+        console.log(data);
             initGame(data);
         }
     );
@@ -377,5 +406,6 @@ jQuery(document).ready(function() {
     $('#attackText').hide().removeClass('hidden');
     $('#fortifyText').hide().removeClass('hidden');
     $('#waitingText').hide().removeClass('hidden');
+    $('#fortifyTextAdditional').hide().removeClass('hidden');
 
 });

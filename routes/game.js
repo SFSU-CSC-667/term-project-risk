@@ -21,7 +21,7 @@ var games = [];
 
 // Socket stuff
 io.on('connection', function(socket) {
-  io.to(socket.id).emit('welcome', 'Welcome to the game!');
+    io.to(socket.id).emit('welcome', 'Welcome to the game!');
     socket.on('chat message', function(msg) {
         io.emit('chat message', msg);
     });
@@ -54,10 +54,10 @@ function startGame(gameID) {
     //return player to start turn or do that here
 }
 
-function isPlayerinGame(players, playerID) {
+function getPlayerByID(players, playerID) {
     for (i = 0; i < players.length; i++) {
         if (players[i].id == playerID) {
-            return true;
+            return players[i];
         }
     }
     return false;
@@ -65,7 +65,6 @@ function isPlayerinGame(players, playerID) {
 
 function addPlayer(gameID, player) {
     var game = games[gameID];
-    console.log("YO_ORIGINAL");
     console.log(player);
     if (game == null) {
         var problem = {};
@@ -73,14 +72,14 @@ function addPlayer(gameID, player) {
         problem.message = "That game does not exist.";
         return problem;
     }
-    if (!isPlayerinGame(game.players, player.id) && game.currentPhase != "setup") {
+    if (!getPlayerByID(game.players, player.id) && game.currentPhase != "setup") {
         var problem = {};
         problem.type = "error";
         problem.message = "That game is currently in progress, and cannot be joined.";
         return problem;
     }
 
-    if (!isPlayerinGame(game.players, player.id) && game.currentPhase == "setup") {
+    if (!getPlayerByID(game.players, player.id) && game.currentPhase == "setup") {
         //TODO: Need some validation on the player object
         game.players.push(player);
         //TEST CODE
@@ -164,6 +163,7 @@ function draft(gameID, playerid, territory, amount) {
     gameEvent.amount = amount;
 
     io.emit('Draft Move', gameEvent);
+    io.emit('chat message', player.name + ' has placed ' + amount + ' troops in ' + game.territories.territories[territory - 1].name);
 
     return true;
 }
@@ -202,7 +202,8 @@ function endPhase(gameID) {
 
             var gameEvent = new Event(gameID, 'End Phase');
             gameEvent.player = game.currentPlayer;
-            io.emit('chat message', game.currentPlayer + ' Draft Phase Ended. Starting Attack Phase');
+            var name = getPlayerByID(game.players, game.currentPlayer).name;
+            io.emit('chat message', name + ' Draft Phase Ended. Starting Attack Phase');
             io.emit('Attack Phase Start', gameEvent);
             game.currentDraftCount = -1;
 
@@ -213,7 +214,8 @@ function endPhase(gameID) {
 
             var gameEvent = new Event(gameID, 'End Phase');
             gameEvent.player = game.currentPlayer;
-            io.emit('chat message', game.currentPlayer + 'Attack Phase Ended. Starting Fortify Phase');
+            var name = getPlayerByID(game.players, game.currentPlayer).name;
+            io.emit('chat message', name + ' Attack Phase Ended. Starting Fortify Phase');
             io.emit('Fortify Phase Start', gameEvent);
 
             break;
