@@ -579,7 +579,7 @@ router.post('/events', function(req, res, next) {
             res.send(draft(req.body.gameid, req.body.playerid, req.body.territory, req.body.amount));
             break;
         case "Attack":
-            res.send(attack(req.body.event.gameid, req.body.event.territory, req.body.event.territory, req.body.event.amount, req.body.event.amount));
+            res.send(attack(req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.amount));
             break;
         case "BattleResult":
             //not implemented

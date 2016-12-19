@@ -184,6 +184,15 @@ function attack(name, attackTroops, sourceTerritoryText, sourceID, destID) {
             console.log("Attacked with " + document.getElementById('attackValue').value + " troops against " + name);
             document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) - parseInt(document.getElementById('attackValue').value);
         	sourceTerritoryText.textContent = parseInt(sourceTerritoryText.textContent) - parseInt(document.getElementById('attackValue').value);
+        
+        	var body = {};
+	    	body.playerid = parseInt(game.currentPlayer);
+	    	body.targetterritory = sourceID;
+	    	body.sourceterritory = destID;
+	    	body.amount = parseInt(document.getElementById('attackValue').value);
+	    	body.type = "Attack";
+	    	console.log(body);
+	    	sendEvent(body);
         }
         //Hides model when you click away or click the close button
 	    document.getElementsByClassName("close")[2].onclick = function() {
