@@ -14,9 +14,9 @@ socket.on('welcome', function(msg) {
     $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
 });
 socket.on('chat message', function(msg) {
-	if(msg.gameid == $('#gameid').val()){
-    	$('#messages').append($('<li>').text(msg.message));
-	}
+    if (msg.gameid == $('#gameid').val()) {
+        $('#messages').append($('<li>').text(msg.message));
+    }
 });
 
 function territoryClicked(name, id) {
@@ -268,7 +268,7 @@ function initGame(gameState) {
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
     } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
-    	console.log("CURRENT PHASE " + gameState.currentPhase);
+        console.log("CURRENT PHASE " + gameState.currentPhase);
         if (gameState.currentPhase == 'draft') {
             startDraft(gameState.currentPlayer, gameState.id);
         } else if (gameState.currentPhase == 'attack') {
@@ -346,62 +346,87 @@ function startFortify(playerID, gameid) {
 }
 
 socket.on('Game Starting', function(event) {
-    updateMap();
-    setPlayerActive(event.currentPlayer);
-    $("#setupText").hide();
-    if (Number(localStorage.getItem("userID")) == event.currentPlayer) {
-        startDraft(event.currentPlayer, event.game);
-    } else {
-        $("#waitingText").show();
+    if (event.game == $('#gameid').val()) {
+        updateMap();
+        setPlayerActive(event.currentPlayer);
+        $("#setupText").hide();
+        if (Number(localStorage.getItem("userID")) == event.currentPlayer) {
+            startDraft(event.currentPlayer, event.game);
+        } else {
+            $("#waitingText").show();
+        }
     }
 }).on('Player Joined', function(event) {
-    updateGame();
-    updateMap();
-    addPlayer(event.player.id, event.player.name);
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+        addPlayer(event.player.id, event.player.name);
+    }
+
+
 }).on('Attack Phase Start', function(event) {
-    updateGame();
-    updateMap();
-    if (event.player == localStorage.getItem("userID")) {
-        startAttack(event.player, event.game);
-    } else {
-        $("#waitingText").show();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+        if (event.player == localStorage.getItem("userID")) {
+            startAttack(event.player, event.game);
+        } else {
+            $("#waitingText").show();
+        }
     }
+
 }).on('Fortify Phase Start', function(event) {
-    updateGame();
-    updateMap();
-    if (event.player == localStorage.getItem("userID")) {
-        startFortify(event.player, event.game);
-    } else {
-        $("#waitingText").show();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+        if (event.player == localStorage.getItem("userID")) {
+            startFortify(event.player, event.game);
+        } else {
+            $("#waitingText").show();
+        }
     }
+
 }).on('End Turn', function(event) {
-    updateGame();
-    updateMap();
-    if (event.player == localStorage.getItem("userID")) {
-        $('#fortifypill').removeClass("active").addClass('disabled');
-        $('#fortifyText').hide();
-        $("#waitingText").show();
-    } else {
-        $("#waitingText").show();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+        if (event.player == localStorage.getItem("userID")) {
+            $('#fortifypill').removeClass("active").addClass('disabled');
+            $('#fortifyText').hide();
+            $("#waitingText").show();
+        } else {
+            $("#waitingText").show();
+        }
     }
+
 }).on('Start Turn', function(event) {
-    updateGame();
-    updateMap();
-    setPlayerActive(event.player);
-    if (event.player == localStorage.getItem("userID")) {
-        startDraft(event.currentPlayer, event.game);
-    } else {
-        $("#waitingText").show();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+        setPlayerActive(event.player);
+        if (event.player == localStorage.getItem("userID")) {
+            startDraft(event.currentPlayer, event.game);
+        } else {
+            $("#waitingText").show();
+        }
     }
+
 }).on('Draft Move', function(event) {
-    updateGame();
-    updateMap();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+    }
+
 }).on('Battle Result', function(event) {
-    updateGame();
-    updateMap();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+    }
 }).on('Fortify Move', function(event) {
-    updateGame();
-    updateMap();
+    if (event.game == $('#gameid').val()) {
+        updateGame();
+        updateMap();
+    }
 });
 
 
@@ -438,7 +463,7 @@ jQuery(document).ready(function() {
         "/game/" + $('#gameid').val() + "/chat",
         function(data) {
             if (data != false) {
-            	for (i = 0; i < data.length; i++) $('#messages').append($('<li>').text(data[i].message));
+                for (i = 0; i < data.length; i++) $('#messages').append($('<li>').text(data[i].message));
             }
         }
     );
@@ -501,13 +526,13 @@ jQuery(document).ready(function() {
         }
     });
     document.getElementById('sendButton').onclick = function() {
-    	var msgobj = {};
-    	msgobj.gameid = $('#gameid').val();
-    	if (localStorage.getItem("userID") == null || ($('#player_' + localStorage.getItem("userID")) == null)) {
-    		msgobj.message = 'Spectator: ' + $('#text').val();
-    	} else {
-    		msgobj.message = $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val();
-    	}
+        var msgobj = {};
+        msgobj.gameid = $('#gameid').val();
+        if (localStorage.getItem("userID") == null || ($('#player_' + localStorage.getItem("userID")) == null)) {
+            msgobj.message = 'Spectator: ' + $('#text').val();
+        } else {
+            msgobj.message = $('#player_' + localStorage.getItem("userID")).text() + ': ' + $('#text').val();
+        }
         socket.emit('chat message', msgobj);
         $('#text').val('');
         return false;
