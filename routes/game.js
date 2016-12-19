@@ -168,17 +168,28 @@ function draft(gameID, playerid, territory, amount) {
     return true;
 }
 
-function endTurn(game, player) {
-    var playerIndex = game.players.indexOf(player);
+function endTurn(gameID) {
+    var game = games[gameID];
+
+    var gameEvent = new Event(gameID, 'EndTurn');
+    gameEvent.player = game.currentPlayer;
+    var name = getPlayerByID(game.players, game.currentPlayer).name;
+    io.emit('End Turn', gameEvent);
+    io.emit('chat message', name + ' has ended their turn.');
+
+    var playerIndex = game.players.indexOf(getPlayerByID(game.players, game.currentPlayer));
 
     if (++playerIndex > 3)
         playerIndex = 0;
 
     game.currentPlayer = game.players[playerIndex].id;
 
-    var gameEvent = new Event(gameID, 'EndTurn');
-    gameEvent.player = player;
-    io.emit(player.name + 'Ended Turn', gameEvent);
+    var gameEvent = new Event(gameID, 'StartTurn');
+    gameEvent.player = game.currentPlayer;
+    name = getPlayerByID(game.players, game.currentPlayer).name;
+    io.emit('Start Turn', gameEvent);
+    io.emit('chat message', name + ' has started their turn.');
+
     game.currentPhase = "draft";
     return true;
 }
@@ -221,7 +232,7 @@ function endPhase(gameID) {
             break;
 
         case "fortify":
-            endTurn(game, game.currentPlayer);
+            endTurn(gameID);
             break;
         default:
             console.log("Something went wrong.");
