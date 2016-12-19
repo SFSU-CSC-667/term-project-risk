@@ -235,7 +235,7 @@ function updateGame(){
 	$.get(
         "/game/" + $('#gameid').val() + "/state",
         function(data) {
-        	game.territories = data.territories.territories;
+        	game.territories = data.map.territories;
 			game.currentPlayer = data.currentPlayer;
 			game.currentPhase = data.currentPhase;
 			game.id = data.id;
@@ -248,8 +248,8 @@ function initGame(gameState) {
     for (i = 0; i < gameState.players.length; i++) {
         addPlayer(gameState.players[i].id, gameState.players[i].name);
     }
-    drawMap(gameState.territories.territories);
-    game.territories = gameState.territories.territories;
+    drawMap(gameState.map.territories);
+    game.territories = gameState.map.territories;
     setPlayerActive(gameState.currentPlayer);
     game.currentPlayer = gameState.currentPlayer;
     game.currentPhase = gameState.currentPhase;
