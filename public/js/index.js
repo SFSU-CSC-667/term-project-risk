@@ -30,7 +30,7 @@ function createPlayer(data) {
         event.gameid = data.id;
         event.player = {};
         event.player.name = response.name;
-        event.player.id = response.id;
+        event.player.id = localStorage.getItem("userID");
         event.player.game = data.id;
         event.type = "PlayerJoined";
         $.post(
