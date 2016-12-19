@@ -306,19 +306,6 @@ jQuery(document).ready(function() {
         	} 
         }
         
-        /*if(upLimit != undefined) {
-        	if(!isNaN(currentVal)&&currentVal < upLimit) {
-            // Increment
-            $('input[name=' + fieldName + ']').val(currentVal + 1);
-        	} 
-        }
-        else {
-        	if(!isNaN(currentVal)) {
-            // Increment
-            $('input[name=' + fieldName + ']').val(currentVal + 1);
-        	} 
-        }*/
-        
     });
     // This button will decrement the value till 0
     $(".qtyminus").click(function(e) {
