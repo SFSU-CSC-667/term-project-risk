@@ -280,17 +280,31 @@ function initTerritories(game) {
 }
 
 
-function attack(gameID, attackingTerritory, defendingTerrritory, attackingTroops, defendingTroops) {
-    //Assumes that territories are adjecent and not owned by same player
+function attack(gameID, attackingTerritory, defendingTerritory, attackingTroops, playerID) {
+
     var game = games[gameID];
 
-    var result = simulate(attackingTroops, defendingTroops);
+    //attacking verifications:
+
+    //attacking player owns source territory
+    if(game.map.territories[attackingTerritory].player != playerID) return false;
+
+    //attack player doesn’t own target territory
+    if(game.map.territories[defendingTerritory].player == playerID) return false;
+
+    //source territory is adjacent to target territory
+    if(!game.map.isAjacent(attackingTerritory, defendingTerritory)) return false;
+
+    //attack amount is >= source territory troop amount + 1
+    if(attackingTroops >= game.map.territories[attackingTerritory].troops) return false;
+
+
+    var result = simulate(attackingTroops, game.map.territories[defendingTerrritory].troops);
     //results = array containing num of remaining troops in territories
 
-    game.addTroops(attackingTerritory, attackingTroops - result[0]); //attackingTroops in result[0]
-    game.addTroops(defendingTerrritory, defendingTroops - result[1]); //defendingTroops in result[1]
+    game.map.addTroops(attackingTerritory, attackingTroops - result[0]); //attackingTroops in result[0]
+    game.map.addTroops(defendingTerrritory, defendingTroops - result[1]); //defendingTroops in result[1]
 
-    //Check for territories
 
     return true;
 
