@@ -31,7 +31,7 @@ io.on('connection', function(socket) {
 function createGame() {
     var game = {};
     game.id = maxGameID;
-    game.territories = new world.Map(maxGameID);
+    game.map = new world.Map(maxGameID);
     game.players = [];
     game.currentPlayer = 0;
     game.currentPhase = "setup";
@@ -151,11 +151,11 @@ function draft(gameID, playerid, territory, amount) {
     }
     if (player == null) return false;
 
-    if (game.territories.territories[territory - 1].player != playerid) return false;
+    if (game.map.territories[territory - 1].player != playerid) return false;
     if (game.currentDraftCount < amount) return false;
     game.currentDraftCount -= amount;
 
-    game.territories.addTroops(territory, amount);
+    game.map.addTroops(territory, amount);
 
     var gameEvent = new Event(gameID, 'DraftMove');
     gameEvent.player = player;
@@ -163,7 +163,7 @@ function draft(gameID, playerid, territory, amount) {
     gameEvent.amount = amount;
 
     io.emit('Draft Move', gameEvent);
-    io.emit('chat message', player.name + ' has placed ' + amount + ' troops in ' + game.territories.territories[territory - 1].name);
+    io.emit('chat message', player.name + ' has placed ' + amount + ' troops in ' + game.map.territories[territory - 1].name);
 
     return true;
 }
@@ -236,7 +236,7 @@ function endGame(gameID) {
 function calculateDraft(gameID, player) {
     var game = games[gameID];
     if (game.currentDraftCount != -1) return game.currentDraftCount;
-    var totalTerritories = game.territories.territoriesOwned(player);
+    var totalTerritories = game.map.territoriesOwned(player);
     var result = Math.floor(totalTerritories / 3);
 
     if (result < 3) {
@@ -252,12 +252,12 @@ function initTerritories(game) {
     //var game = games[gameId];
     var playerIndex = 0;
     var territoryIndex = 1;
-    var totalTerritories = game.territories.territories.length;
+    var totalTerritories = game.map.territories.length;
     var totalTroops = 120;
 
     for (i = 0; i < totalTroops; i++) {
-        game.territories.setPlayer(game.players[playerIndex].id, territoryIndex);
-        game.territories.addTroops(territoryIndex, 1);
+        game.map.setPlayer(game.players[playerIndex].id, territoryIndex);
+        game.map.addTroops(territoryIndex, 1);
 
         playerIndex++;
         territoryIndex++;
@@ -512,7 +512,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id/territories', function(req, res, next) {
     var game = games[req.params.id];
     if (game != null) {
-        res.send(game.territories);
+        res.send(game.map.territories);
     } else {
         res.send(false);
     }
