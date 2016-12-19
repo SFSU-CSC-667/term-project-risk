@@ -82,14 +82,16 @@ function deploy(name) {
     ///Hides when you click Deploy button
     document.getElementById('deploy').onclick = function() {
             document.getElementById('deployModal').style.display = "none";
-            console.log("Deployed " + document.getElementById('deployValue').value + " in " + name);
+            var deployed = document.getElementById('deployValue').value;
             document.getElementById(name + 'Text').textContent = parseInt(document.getElementById(name + 'Text').textContent) + parseInt(document.getElementById('deployValue').value);
             document.getElementById('draft-amount').textContent = parseInt(document.getElementById('draft-amount').textContent) - parseInt(document.getElementById('deployValue').value);
+        	
         	var body = {};
-        	body.player = game.currentPlayer;
-        	body.territory = parseInt(document.getElementById(name + 'Text').id);
-        	body.amount = parseInt(document.getElementById('draft-amount').textContent);
+        	body.playerid = parseInt(game.currentPlayer);
+        	body.territory = parseInt(document.getElementsByName(name)[0].id);
+        	body.amount = deployed;
         	body.type = "DraftMove";
+        	console.log(body);
         	sendEvent(body);
         }
         //Hides model when you click away or click the close button
@@ -173,6 +175,7 @@ function initDraft(playerID, gameid) {
 }
 
 function initGame(gameState) {
+	console.log(gameState);
     for (i = 0; i < gameState.players.length; i++) {
         addPlayer(gameState.players[i].id, gameState.players[i].name);
     }

@@ -37,10 +37,15 @@ function createPlayer(data) {
             "/game/events",
             event,
             function(data) {
-                window.location = "/game/" + event.gameid;
+                console.log(data);
+                if (data.type == "error") {
+                    alert(data.message);
+                } else {
+                    window.location = "/game/" + event.gameid;
+                }
             }
         ).fail(function() { 
-           alert("That game does not exists. "); 
+           alert("There was an error while joining that game. "); 
         });
     });
 }
