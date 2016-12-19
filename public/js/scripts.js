@@ -314,13 +314,15 @@ socket.on('Game Starting', function(event) {
 }).on('Start Turn', function(event) {
 	updateGame();
 	updateMap();
-	console.log(event);
-	console.log(localStorage.getItem("userID"));
+	setPlayerActive(event.player);
     if (event.player == localStorage.getItem("userID")) {
 		startDraft(event.currentPlayer, event.game);
     } else {
         $("#waitingText").show();
     }
+}).on('Draft Move', function(event) {
+	updateGame();
+	updateMap();
 });
 
 
