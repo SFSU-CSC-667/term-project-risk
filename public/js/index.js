@@ -39,7 +39,9 @@ function createPlayer(data) {
             function(data) {
                 window.location = "/game/" + event.gameid;
             }
-        );
+        ).fail(function() { 
+           alert("That game does not exists. "); 
+        });
     });
 }
 

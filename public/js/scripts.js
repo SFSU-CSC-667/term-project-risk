@@ -6,6 +6,7 @@ colors[0] = "red";
 colors[1] = "blue";
 colors[2] = "yellow";
 colors[3] = "green";
+
 var currentPlayers = 0;
 var clickCount = 0;
 var reinforceTroops, sourceTerritory, sourceID, destID, upLimit;
@@ -18,6 +19,7 @@ socket.on('chat message', function(msg){
 
 function territoryClicked(name, id) {
     console.log(name);
+
     if (game.currentPhase == "draft") {
     	//Decrease draft-amount span accordingly when drafting- done
     	//only let me deploy/draft on territories I control - done
@@ -275,6 +277,10 @@ jQuery(document).ready(function() {
     $.get(
         "/game/" + $('#gameid').val() + "/state",
         function(data) {
+        	if(data == false) {
+        		alert("This game does not exist, redirecting you to home.");
+        		window.location = "/";
+        	}
             console.log(data);
             initGame(data);
         }
