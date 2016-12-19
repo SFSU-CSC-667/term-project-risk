@@ -70,7 +70,7 @@ function addPlayer(gameID, player) {
         //TODO: Need some validation on the player object
         game.players.push(player);
         //TEST CODE
-        /*if (game.players.length == 1) {
+        if (game.players.length == 1) {
             playerone = {
                 id: 1,
                 game: 0,
@@ -89,7 +89,7 @@ function addPlayer(gameID, player) {
                 name: 'Paper Boi'
             };
             game.players.push(playerthree);
-        }*/
+        }
 
         if (game.players.length >= 4) {
             startGame(gameID);
