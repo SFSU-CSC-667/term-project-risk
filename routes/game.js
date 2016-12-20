@@ -180,8 +180,8 @@ function draft(res, gameID, playerid, territory, amount) {
         if (player == null) return false;
 
         if (game.map.territories[territory - 1].player != playerid) return false;
-        if (game.currentDraftCount < amount) return false;
-        game.currentDraftCount -= amount;
+        if (game.currentDraftCount < amount) res.send(false);
+        game.currentDraftCount -= parseInt(amount);
         game.map.territories[territory - 1].troops += parseInt(amount);
 
         updateGame(game).then(function(data) {
@@ -754,7 +754,7 @@ router.post('/events', function(req, res, next) {
             res.send(removePlayer(req.body.event.gameid, req.body.event.player));
             break;
         case "DraftMove":
-            draft(res, req.body.gameid, req.body.playerid, req.body.territory, req.body.amount);
+            draft(res, req.body.gameid, req.body.playerid, req.body.territory, parseInt(req.body.amount);
             break;
         case "Attack":
             attack(res, req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.playerid);
