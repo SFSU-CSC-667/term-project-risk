@@ -5,7 +5,7 @@ var Event = require('./event.js');
 var pgp = require('pg-promise')();
 //process.env.DATABASE_URL on heroku
 //'postgres://localhost:5432/risk' on local
-var db = pgp('process.env.DATABASE_URL');
+var db = pgp('postgres://localhost:5432/risk');
 createTables();
 var router = express.Router();
 var maxGameID = 0;
@@ -129,7 +129,7 @@ function addPlayer(res, gameID, player) {
             //TODO: Need some validation on the player object
             game.players.push(player);
             //TEST CODE
-            if (game.players.length == 1) {
+            /*if (game.players.length == 1) {
                 playerone = {
                     id: 1,
                     game: 0,
@@ -148,7 +148,7 @@ function addPlayer(res, gameID, player) {
                     name: 'Paper Boi'
                 };
                 game.players.push(playerthree);
-            }
+            }*/
 
             updateGame(game).then(function(data) {
                 res.send(true);
