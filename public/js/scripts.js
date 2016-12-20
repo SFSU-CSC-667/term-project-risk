@@ -72,6 +72,8 @@ function territoryClicked(name, id) {
                 alert("Select an enemy territory")
             }
             clickCount = 0;
+        } else {
+        	clickCount = 0;
         }
     } else if (game.currentPhase == "fortify") {
         if (game.territories[id - 1].player == game.currentPlayer) {
