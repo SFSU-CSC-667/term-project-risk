@@ -179,10 +179,10 @@ function draft(res, gameID, playerid, territory, amount) {
         }
         if (player == null) return false;
 
-        if (game.map.territories[territory - 1].player != playerid) return false;
+        if (game.map.territories[territory - 1].player != playerid) res.send(false);
         if (game.currentDraftCount < amount) res.send(false);
         game.currentDraftCount -= parseInt(amount);
-        game.map.territories[territory - 1].troops += parseInt(amount);
+        game.map.territories[territory - 1].troops = game.map.territories[territory - 1].troops + parseInt(amount);
 
         updateGame(game).then(function(data) {
             var gameEvent = new Event(game.id, 'DraftMove');
@@ -235,17 +235,6 @@ function endTurn(res, game) {
     });
 }
 
-//Assumes player has no remaining territories
-function playerElimination(gameID, player) {
-
-    return removePlayer(gameID, player);
-}
-
-function playerVictory(gameID, player) {
-    //Do something with player
-    return endGame(gameID);
-}
-
 function endPhase(res, gameID) {
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
@@ -285,11 +274,6 @@ function endPhase(res, gameID) {
                 console.log("Something went wrong.");
         }
     });
-}
-
-function endGame(gameID) {
-    delete games[gameID];
-    return true;
 }
 
 function calculateDraft(res, gameID, player) {
@@ -398,26 +382,26 @@ function attack(res, gameID, attackingTerritory, defendingTerritory, attackingTr
 
         //attacking player owns source territory
         if (game.map.territories[attackingTerritory - 1].player != playerID) {
-            return false;
+            res.send(false);
         }
 
         //attack player doesn’t own target territory
         if (game.map.territories[defendingTerritory - 1].player == playerID) {
-            return false;
+            res.send(false);
         }
 
         //source territory is adjacent to target territory
         if (!game.map.isAdjacent(attackingTerritory, defendingTerritory)) {
-            return false;
+            res.send(false);
         }
 
         //attack amount is >= source territory troop amount
         if (attackingTroops >= game.map.territories[attackingTerritory - 1].troops) {
-            return false;
+            res.send(false);
         }
 
         if (attackingTroops == 0 || game.map.territories[attackingTerritory - 1].player == 0) {
-            return false;
+            res.send(false);
         }
 
         var attackers = attackingTroops;
