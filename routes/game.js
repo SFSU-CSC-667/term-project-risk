@@ -386,7 +386,7 @@ function calculateDraft(res, gameID, player) {
 
         game.currentDraftCount = result;
         updateGame(game).then(function(data) {
-            sendChatMessage(game.id, getPlayerByID(game.players, player).name + ' received ' + result + ' troops in the draft');
+            sendChatMessage(game.id, getPlayerByID(game.players, game.currentPlayer).name + ' received ' + result + ' troops in the draft');
             res.json(result);
         });
     });
