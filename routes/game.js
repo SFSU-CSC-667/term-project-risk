@@ -318,6 +318,7 @@ function endGame(gameID) {
 function calculateDraft(res, gameID, player) {
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
+        console.log("CURRENT DRAFT AMOUNT " + game.currentDraftCount);
         if (game.currentDraftCount != -1) {
             res.json(game.currentDraftCount);
             return;
@@ -325,9 +326,13 @@ function calculateDraft(res, gameID, player) {
         var totalTerritories = game.map.territoriesOwned(player);
         var result = Math.floor(totalTerritories / 3);
 
+        console.log("DRAFT CURRENT TOTAL T " + totalTerritories);
+
         if (result < 3) {
             result = 3;
         }
+
+        console.log("DRAFT RESULT BEFORE BONUS " + result);
 
         //Continent bonuses
         var naBonus = true;
@@ -383,6 +388,9 @@ function calculateDraft(res, gameID, player) {
             }
         }
         if (auBonus) result += 2;
+
+        console.log("DRAFT RESULT AFTER BONUS " + result);
+
 
         game.currentDraftCount = result;
         updateGame(game).then(function(data) {
