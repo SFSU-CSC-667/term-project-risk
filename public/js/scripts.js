@@ -114,7 +114,7 @@ function deploy(name) {
             var body = {};
             body.playerid = parseInt(game.currentPlayer);
             body.territory = parseInt(document.getElementsByName(name)[0].id);
-            body.amount = deployed;
+            body.amount = parseInt(deployed);
             body.type = "DraftMove";
             console.log(body);
             sendEvent(body);

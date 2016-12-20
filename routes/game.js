@@ -182,8 +182,7 @@ function draft(res, gameID, playerid, territory, amount) {
         if (game.map.territories[territory - 1].player != playerid) return false;
         if (game.currentDraftCount < amount) return false;
         game.currentDraftCount -= amount;
-
-        game.map.addTroops(territory, amount);
+        game.map.territories[territory - 1].troops += parseInt(amount);
 
         updateGame(game).then(function(data) {
             var gameEvent = new Event(game.id, 'DraftMove');
