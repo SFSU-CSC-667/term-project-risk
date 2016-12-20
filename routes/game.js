@@ -318,6 +318,7 @@ function endGame(gameID) {
 function calculateDraft(res, gameID, player) {
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
+        player = game.currentPlayer;
         console.log("CURRENT DRAFT AMOUNT " + game.currentDraftCount);
         if (game.currentDraftCount != -1) {
             res.json(game.currentDraftCount);
