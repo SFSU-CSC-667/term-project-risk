@@ -126,29 +126,7 @@ function addPlayer(res, gameID, player) {
             problem.message = "That game is currently in progress, and cannot be joined.";
             res.send(problem);
         } else if (!getPlayerByID(game.players, player.id) && game.currentPhase == "setup") {
-            //TODO: Need some validation on the player object
             game.players.push(player);
-            //TEST CODE
-            /*if (game.players.length == 1) {
-                playerone = {
-                    id: 1,
-                    game: 0,
-                    name: 'Childish Gambino'
-                };
-                game.players.push(playerone);
-                playertwo = {
-                    id: 2,
-                    game: 0,
-                    name: 'Lil Yachty'
-                };
-                game.players.push(playertwo);
-                playerthree = {
-                    id: 3,
-                    game: 0,
-                    name: 'Paper Boi'
-                };
-                game.players.push(playerthree);
-            }*/
 
             updateGame(game).then(function(data) {
                 res.send(true);
@@ -319,7 +297,6 @@ function calculateDraft(res, gameID, player) {
     getGame(gameID).then(function(data) {
         var game = buildGame(data);
         player = game.currentPlayer;
-        console.log("CURRENT DRAFT AMOUNT " + game.currentDraftCount);
         if (game.currentDraftCount != -1) {
             res.json(game.currentDraftCount);
             return;
@@ -327,13 +304,9 @@ function calculateDraft(res, gameID, player) {
         var totalTerritories = game.map.territoriesOwned(player);
         var result = Math.floor(totalTerritories / 3);
 
-        console.log("DRAFT CURRENT TOTAL T " + totalTerritories);
-
         if (result < 3) {
             result = 3;
         }
-
-        console.log("DRAFT RESULT BEFORE BONUS " + result);
 
         //Continent bonuses
         var naBonus = true;
@@ -390,9 +363,6 @@ function calculateDraft(res, gameID, player) {
         }
         if (auBonus) result += 2;
 
-        console.log("DRAFT RESULT AFTER BONUS " + result);
-
-
         game.currentDraftCount = result;
         updateGame(game).then(function(data) {
             sendChatMessage(game.id, getPlayerByID(game.players, game.currentPlayer).name + ' received ' + result + ' troops in the draft');
@@ -419,7 +389,6 @@ function initTerritories(game) {
         if (territoryIndex > totalTerritories)
             territoryIndex = 1;
     }
-    game.map.territories[0].troops = 700;
 }
 
 function attack(res, gameID, attackingTerritory, defendingTerritory, attackingTroops, playerID) {

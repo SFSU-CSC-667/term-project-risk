@@ -13,14 +13,14 @@ var reinforceTroops, attackTroops, sourceTerritory, sourceID, destID, upLimit;
 socket.on('welcome', function(msg) {
     $('#messages').append($('<li style="font-size:20px; font-weight: bold">').text(msg));
     $('#messages').animate({
-        scrollTop: 10000
+        scrollTop: 20000
     }, 1000);
 });
 socket.on('chat message', function(msg) {
     if (msg.gameid == $('#gameid').val()) {
         $('#messages').append($('<li>').text(msg.message));
         $('#messages').animate({
-            scrollTop: 10000
+            scrollTop: 20000
         }, 1000);
     }
 });
@@ -237,7 +237,6 @@ function startDraft(playerID, gameid) {
     body.playerid = playerID;
     body.gameid = gameid;
     game.draft = 0;
-    console.log("FETCHING DRAFT");
     $.post(
         "/game/draft",
         body,
