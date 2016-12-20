@@ -313,6 +313,7 @@ this.Map = function(gameid) {
 
     }
     this.territoriesOwned = function(playerID) {
+    	console.log("DRAFT TERR OWNED FUNC " + playerID);
     	var amount = 0;
     	for (var i = 0; i < this.territories.length; i++) {
 		    if (this.territories[i].player == playerID) amount++;
