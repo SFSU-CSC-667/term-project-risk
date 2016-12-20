@@ -5,7 +5,7 @@ var Event = require('./event.js');
 var pgp = require('pg-promise')();
 //process.env.DATABASE_URL on heroku
 //'postgres://localhost:5432/risk' on local
-var db = pgp('postgres://localhost:5432/risk');
+var db = pgp('process.env.DATABASE_URL');
 createTables();
 var router = express.Router();
 var maxGameID = 0;
