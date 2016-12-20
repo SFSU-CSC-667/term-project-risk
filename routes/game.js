@@ -21,8 +21,8 @@ io.on('connection', function(socket) {
 
 
 function createTables() {
-    db.any("CREATE TABLE game (id integer NOT NULL, players text, currentPlayer bigint, currentPhase varchar(10),"
-     + "currentDraftCount int, territories text);");
+    db.any("CREATE TABLE game (id integer NOT NULL, players text, currentPlayer bigint, currentPhase varchar(10)," +
+        "currentDraftCount int, territories text);");
     db.any("CREATE TABLE chat (gameid integer NOT NULL, message text);");
 }
 
@@ -221,26 +221,39 @@ function draft(res, gameID, playerid, territory, amount) {
 }
 
 function endTurn(res, game) {
-    var gameEvent = new Event(game.id, 'EndTurn');
-    gameEvent.player = game.currentPlayer;
-    var name = getPlayerByID(game.players, game.currentPlayer).name;
-    io.emit('End Turn', gameEvent);
-    sendChatMessage(game.id, name + ' has ended their turn.');
+    if (game.players.length == 1) {
+        game.currentPhase = "over";
 
-    var playerIndex = game.players.indexOf(getPlayerByID(game.players, game.currentPlayer));
+        var gameEvent = new Event(game.id, 'Victory');
+        gameEvent.player = game.currentPlayer;
+        var name = getPlayerByID(game.players, game.currentPlayer).name;
+        gameEvent.name = name;
+        io.emit('Victory', gameEvent);
+        sendChatMessage(game.id, name + ' has won the game!');
+    } else {
+        var gameEvent = new Event(game.id, 'EndTurn');
+        gameEvent.player = game.currentPlayer;
+        var name = getPlayerByID(game.players, game.currentPlayer).name;
+        io.emit('End Turn', gameEvent);
+        sendChatMessage(game.id, name + ' has ended their turn.');
 
-    if (++playerIndex > 3)
-        playerIndex = 0;
+        var playerIndex = game.players.indexOf(getPlayerByID(game.players, game.currentPlayer));
+        playerIndex++;
+        if (playerIndex >= game.players.length)
+            playerIndex = 0;
 
-    game.currentPlayer = game.players[playerIndex].id;
-    game.currentPhase = "draft";
+        game.currentPlayer = game.players[playerIndex].id;
+        game.currentPhase = "draft";
+    }
 
     updateGame(game).then(function(data) {
-        var gameEvent = new Event(game.id, 'StartTurn');
-        gameEvent.player = game.currentPlayer;
-        name = getPlayerByID(game.players, game.currentPlayer).name;
-        io.emit('Start Turn', gameEvent);
-        sendChatMessage(game.id, name + ' has started their turn.');
+        if (game.players.length != 1) {
+            var gameEvent = new Event(game.id, 'StartTurn');
+            gameEvent.player = game.currentPlayer;
+            name = getPlayerByID(game.players, game.currentPlayer).name;
+            io.emit('Start Turn', gameEvent);
+            sendChatMessage(game.id, name + ' has started their turn.');
+        }
         res.send(true);
     });
 }
@@ -316,20 +329,10 @@ function calculateDraft(res, gameID, player) {
             result = 3;
         }
 
-        /*
-        Continent Bonuses:
-        North America: 5, 1-9
-        South America: 2, 10-13
-        Africa: 3, 14-19 
-        Europe: 5, 20-26
-        Asia: 7, 27-38
-        Australia: 2, 39 - 42
-        */
-
-        // North America
+        //Continent bonuses
         var naBonus = true;
-        for (i = 0; i < 9; i++){
-            if (game.map.territories[i].player != player){
+        for (i = 0; i < 9; i++) {
+            if (game.map.territories[i].player != player) {
                 naBonus = false;
                 break;
             }
@@ -337,8 +340,8 @@ function calculateDraft(res, gameID, player) {
         if (naBonus) result += 5;
 
         var saBonus = true;
-        for (i = 9; i < 13; i++){
-            if (game.map.territories[i].player != player){
+        for (i = 9; i < 13; i++) {
+            if (game.map.territories[i].player != player) {
                 saBonus = false;
                 break;
             }
@@ -346,8 +349,8 @@ function calculateDraft(res, gameID, player) {
         if (saBonus) result += 2;
 
         var afBonus = true;
-        for (i = 13; i < 19; i++){
-            if (game.map.territories[i].player != player){
+        for (i = 13; i < 19; i++) {
+            if (game.map.territories[i].player != player) {
                 afBonus = false;
                 break;
             }
@@ -355,8 +358,8 @@ function calculateDraft(res, gameID, player) {
         if (afBonus) result += 3;
 
         var euBonus = true;
-        for (i = 19; i < 26; i++){
-            if (game.map.territories[i].player != player){
+        for (i = 19; i < 26; i++) {
+            if (game.map.territories[i].player != player) {
                 euBonus = false;
                 break;
             }
@@ -364,8 +367,8 @@ function calculateDraft(res, gameID, player) {
         if (euBonus) result += 5;
 
         var asBonus = true;
-        for (i = 26; i < 38; i++){
-            if (game.map.territories[i].player != player){
+        for (i = 26; i < 38; i++) {
+            if (game.map.territories[i].player != player) {
                 asBonus = false;
                 break;
             }
@@ -373,8 +376,8 @@ function calculateDraft(res, gameID, player) {
         if (asBonus) result += 7;
 
         var auBonus = true;
-        for (i = 38; i < 42; i++){
-            if (game.map.territories[i].player != player){
+        for (i = 38; i < 42; i++) {
+            if (game.map.territories[i].player != player) {
                 auBonus = false;
                 break;
             }
@@ -407,6 +410,7 @@ function initTerritories(game) {
         if (territoryIndex > totalTerritories)
             territoryIndex = 1;
     }
+    game.map.territories[0].troops = 700;
 }
 
 function attack(res, gameID, attackingTerritory, defendingTerritory, attackingTroops, playerID) {
@@ -444,6 +448,8 @@ function attack(res, gameID, attackingTerritory, defendingTerritory, attackingTr
         var defenders = game.map.territories[defendingTerritory - 1].troops;
         var AttackerName = getPlayerByID(game.players, game.currentPlayer).name;
         var DefenderName = getPlayerByID(game.players, game.map.territories[defendingTerritory - 1].player).name;
+        var defenderID = getPlayerByID(game.players, game.map.territories[defendingTerritory - 1].player).id;
+        var eliminated = false;
         var AttackTerritoryName = game.map.territories[attackingTerritory - 1].name;
         var DefendTerritoryName = game.map.territories[defendingTerritory - 1].name;
 
@@ -468,17 +474,31 @@ function attack(res, gameID, attackingTerritory, defendingTerritory, attackingTr
                 DefendTerritoryName + ' (' + DefenderName + ') and was defeated!');
         }
 
+        if (game.map.territoriesOwned(defenderID) == 0) {
+            sendChatMessage(game.id, AttackerName + ' has eliminated ' + DefenderName);
+            for (i = 0; i < game.players.length; i++) {
+                if (game.players[i].id == defenderID) {
+                    game.players.splice(i, 1);
+                    break;
+                }
+            }
+            eliminated = true;
+        }
+
         updateGame(game).then(function(data) {
             var gameEvent = new Event(game.id, 'Battle Result');
             gameEvent.player = game.currentPlayer;
             io.emit('Battle Result', gameEvent);
 
+            if (eliminated) {
+                var gameEvent = new Event(game.id, 'Player Eliminated');
+                gameEvent.player = defenderID;
+                io.emit('Player Eliminated', gameEvent);
+            }
+
             res.send(true);
         });
     });
-
-
-
 }
 
 function simulate(attackingTroops, defendingTroops) {

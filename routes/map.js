@@ -236,7 +236,7 @@ this.Map = function(gameid) {
 		troops: 0,
 		player: 0,
 		game: gameid, 
-		adjacent: [32, 25]
+		adjacent: [32, 25, 35]
 	}, {
 		id: 35,
 		name: "Mongolia",

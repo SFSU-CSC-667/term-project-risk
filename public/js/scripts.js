@@ -117,9 +117,6 @@ function deploy(name) {
             console.log(body);
             sendEvent(body);
 
-            /*if (parseInt(document.getElementById('draft-amount').textContent) == 0) {
-                endPhase();
-            }*/
         }
         //Hides model when you click away or click the close button
     document.getElementsByClassName("close")[0].onclick = function() {
@@ -253,6 +250,7 @@ function updateGame() {
             game.territories = data.map.territories;
             game.currentPlayer = data.currentPlayer;
             game.currentPhase = data.currentPhase;
+         	game.players = data.players;
             game.id = data.id;
         }
     );
@@ -273,6 +271,9 @@ function initGame(gameState) {
     game.id = gameState.id;
     if (gameState.currentPhase == 'setup') {
         $("#setupText").show();
+    } else if (gameState.currentPhase == 'over'){
+    	$('#winner').text(gameState.players[0].name);
+    	$("#victoryText").show();
     } else if (gameState.currentPlayer == localStorage.getItem("userID")) {
         console.log("CURRENT PHASE " + gameState.currentPhase);
         if (gameState.currentPhase == 'draft') {
@@ -307,7 +308,7 @@ function addPlayer(playerID, playerName) {
     currentPlayers++;
 }
 
-function removePlayer(playerID, playerName) {
+function removePlayer(playerID) {
     $('#player_' + playerID).remove();
 }
 
@@ -433,6 +434,22 @@ socket.on('Game Starting', function(event) {
         updateGame();
         updateMap();
     }
+}).on('Player Eliminated', function(event) {
+    if (event.game == $('#gameid').val()) {
+    	removePlayer(event.player);
+        updateGame();
+        updateMap();
+    }
+}).on('Victory', function(event) {
+    if (event.game == $('#gameid').val()) {
+	    $('#fortifypill').removeClass("active").addClass('disabled');
+	    $('#fortifyText').hide();
+	    $('#waitingText').hide();
+    	$('#winner').text(event.name);
+    	$("#victoryText").show();
+        updateGame();
+        updateMap();
+    }
 });
 
 
@@ -550,5 +567,7 @@ jQuery(document).ready(function() {
     $('#fortifyText').hide().removeClass('hidden');
     $('#waitingText').hide().removeClass('hidden');
     $('#fortifyTextAdditional').hide().removeClass('hidden');
+    $('#attackTextAdditional').hide().removeClass('hidden');
+    $('#victoryText').hide().removeClass('hidden');
 
 });
