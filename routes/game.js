@@ -754,7 +754,7 @@ router.post('/events', function(req, res, next) {
             res.send(removePlayer(req.body.event.gameid, req.body.event.player));
             break;
         case "DraftMove":
-            draft(res, req.body.gameid, req.body.playerid, req.body.territory, parseInt(req.body.amount);
+            draft(res, req.body.gameid, req.body.playerid, req.body.territory, parseInt(req.body.amount));
             break;
         case "Attack":
             attack(res, req.body.gameid, req.body.sourceterritory, req.body.targetterritory, req.body.amount, req.body.playerid);
